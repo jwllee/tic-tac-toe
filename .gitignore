@@ -67,6 +67,9 @@ ui_*.h
 Makefile*
 *build-*
 
+# project
+build/
+
 # Qt unit tests
 target_wrapper.*
 
