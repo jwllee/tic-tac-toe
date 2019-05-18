@@ -49,6 +49,9 @@ WORKDIR /qt/build
 ADD build_qt.sh /qt/build/build_qt.sh
 RUN QT_VERSION=$QT_VERSION QT_CREATOR=$QT_CREATOR_VERSION /qt/build/build_qt.sh
 
+RUN apt-get update && apt-get install -y \
+	cmake
+
 WORKDIR $HOME
 
 RUN useradd --home-dir $HOME jonny \
