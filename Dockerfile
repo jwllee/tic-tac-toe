@@ -52,6 +52,10 @@ RUN QT_VERSION=$QT_VERSION QT_CREATOR=$QT_CREATOR_VERSION /qt/build/build_qt.sh
 RUN apt-get update && apt-get install -y \
 	cmake
 
+RUN git config --global user.email "jonathan.wailam.lee@gmail.com" \
+	&& git config --global user.name "Wai Lam Jonathan Lee" \
+	&& git config --global commit.gpgsign false
+
 WORKDIR $HOME
 
 RUN useradd --home-dir $HOME jonny \
