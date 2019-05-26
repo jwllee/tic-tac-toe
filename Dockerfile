@@ -7,7 +7,9 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 # Build prequisites
 RUN apt-get update && apt-get install -y \
 	python3 \
+	python3-dev \
 	python3-pip \
+	python3-venv \
 	libxcb-xinerama0-dev \
 	make \
 	build-essential 
@@ -51,6 +53,15 @@ RUN useradd --home-dir $HOME jonny \
 	&& gpasswd -a jonny code \
 	&& chown -R jonny:jonny $HOME
 
+RUN apt-get update && apt-get install -y \
+	libgl1-mesa-glx \
+	qtbase5-dev
+
 USER jonny
 
-RUN pip3 install --user fbs PyQt5==5.9.2
+ENV VIRTUAL_ENV=$HOME/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin":$PATH
+
+RUN pip install wheel \
+	&& pip install fbs PyQt5==5.9.2
