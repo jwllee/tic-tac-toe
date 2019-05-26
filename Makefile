@@ -11,5 +11,3 @@ run-container: build-docker
 		--device /dev/snd:/dev/snd \
 		tic-tac-toe /bin/bash
 
-all:
-	@mkdir -p build && cd build && cmake .. && $(MAKE)
