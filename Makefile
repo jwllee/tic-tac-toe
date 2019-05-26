@@ -13,3 +13,6 @@ run-container: build-docker
 
 all:
 	@mkdir -p build && cd build && cmake .. && $(MAKE)
+
+test:
+	@mkdir -p test-build && cd test-build & cmake ../test && $(MAKE)
