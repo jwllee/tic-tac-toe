@@ -63,5 +63,8 @@ ENV VIRTUAL_ENV=$HOME/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin":$PATH
 
-RUN pip install wheel \
-	&& pip install fbs PyQt5==5.9.2
+ADD ./setup_requirements.txt /tmp/setup_requirements.txt
+RUN pip install -r /tmp/setup_requirements.txt
+
+ADD ./requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
