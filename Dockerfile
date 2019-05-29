@@ -57,6 +57,13 @@ RUN apt-get update && apt-get install -y \
 	libgl1-mesa-glx \
 	qtbase5-dev
 
+# fpm package manager required by fps to freeze qt applications in linux
+RUN apt-get update && apt-get install -y \
+	ruby \
+	ruby-dev \
+	rubygems \
+	&& gem install --no-ri --no-rdoc fpm
+
 USER jonny
 
 ENV VIRTUAL_ENV=$HOME/venv
