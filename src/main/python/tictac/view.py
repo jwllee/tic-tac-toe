@@ -34,7 +34,7 @@ class View(ABC):
 class TextBoard2dDisplayer:
     EMPTY = '_'
 
-    def display(self, board):
+    def display(self, board, f=sys.stdout):
         for row in range(board.n_rows):
             s = ''
             for col in range(board.n_cols):
@@ -42,8 +42,8 @@ class TextBoard2dDisplayer:
                     s += str(self.EMPTY)
                 else:
                     cell = board.get_cell(row, col)
-            print(s)
                     s += str(cell.val.marker)
+            print(s, file=f)
 
 
 class TextView(View):
