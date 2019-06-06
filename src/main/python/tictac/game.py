@@ -98,13 +98,13 @@ class Game(ABC):
 
 class GameBasic(Game):
     def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def setup(self):
         n_rows = self.game_configs[GameParameter.BOARD_DIM]
         n_cols = self.game_configs[GameParameter.BOARD_DIM]
         self.board = board_mod.Board2d(n_rows, n_cols)
-        super().setup(self)
+        super().setup()
 
     def mark_cell(self, marker, loc):
         is_marked = self.board.mark_cell(marker, loc)

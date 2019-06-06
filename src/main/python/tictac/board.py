@@ -114,7 +114,7 @@ class Board(ABC):
 
 class Board2d(Board):
     def __init__(self, n_rows, n_cols):
-        super().__init__(self)
+        super().__init__()
         err_msg = 'Basic tic-tac-toe board has equal no. of rows and cols!'
         assert n_rows == n_cols, err_msg
         self.__coordinate_format = 'r,c'

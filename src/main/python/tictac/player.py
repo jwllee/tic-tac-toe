@@ -38,7 +38,7 @@ class PlayerReal(Player):
 
 class PlayerAI(Player):
     def __init__(self, strategy, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.strategy = strategy
 
     def get_move(self):
