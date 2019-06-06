@@ -4,8 +4,8 @@ import sys
 
 
 __all__ = [
-    'TerminalBoard2dDisplayer',
-    'TerminalView'
+    'TextBoard2dDisplayer',
+    'TextView'
 ]
 
 
@@ -31,7 +31,7 @@ class View(ABC):
         raise NotImplementedError('Please implement this method.')
 
 
-class TerminalBoard2dDisplayer:
+class TextBoard2dDisplayer:
     EMPTY = '_'
 
     def display(self, board):
@@ -46,7 +46,7 @@ class TerminalBoard2dDisplayer:
             print(s)
 
 
-class TerminalView(View):
+class TextView(View):
     def update(self, board):
         self.board_displayer.display(board)
 
