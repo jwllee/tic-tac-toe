@@ -69,6 +69,7 @@ USER jonny
 ENV VIRTUAL_ENV=$HOME/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin":$PATH
+ENV PYTHONPATH="/home/jonny/.local/lib/python3.6/site-packages/":$PYTHONPATH
 
 ADD ./setup_requirements.txt /tmp/setup_requirements.txt
 RUN pip install -r /tmp/setup_requirements.txt
