@@ -4,8 +4,8 @@ import sys
 
 
 class View(ABC):
-    def __init__(self, board_view):
-        self.board_view = board_view
+    def __init__(self, board_displayer):
+        self.board_displayer = board_displayer
         self.logger = utils.make_logger(self.__class__.__name__)
 
     @abstractmethod
@@ -25,7 +25,7 @@ class View(ABC):
         raise NotImplementedError('Please implement this method.')
 
 
-class Terminal2dBoard:
+class TerminalBoard2dDisplayer:
     EMPTY = '_'
 
     def display(self, board):
@@ -42,7 +42,7 @@ class Terminal2dBoard:
 
 class TerminalView(View):
     def update(self, board):
-        self.board_view.display(board)
+        self.board_displayer.display(board)
 
     def get_input(self, msg=None):
         if msg is not None:
