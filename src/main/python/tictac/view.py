@@ -39,11 +39,11 @@ class TextBoard2dDisplayer:
             s = ''
             for col in range(board.n_cols):
                 if board.is_cell_empty(row, col):
-                    s.append(EMPTY)
+                    s += str(self.EMPTY)
                 else:
                     cell = board.get_cell(row, col)
-                    s.append(cell.val.marker)
             print(s)
+                    s += str(cell.val.marker)
 
 
 class TextView(View):
