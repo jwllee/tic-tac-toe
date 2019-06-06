@@ -3,6 +3,12 @@ from abc import ABC, abstractmethod
 import sys
 
 
+__all__ = [
+    'TerminalBoard2dDisplayer',
+    'TerminalView'
+]
+
+
 class View(ABC):
     def __init__(self, board_displayer):
         self.board_displayer = board_displayer
