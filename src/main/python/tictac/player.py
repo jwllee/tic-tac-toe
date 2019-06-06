@@ -48,4 +48,4 @@ class PlayerAI(Player):
         assert self.marker is not None, 'Player does not have marker!'
         assert self.strategy is not None, 'AI player does not have a strategy!'
         assert self.board is not None, 'Player does not have access to board!'
-        return None
+        return self.strategy.get_move(self.board)
