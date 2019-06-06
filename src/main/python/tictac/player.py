@@ -32,13 +32,16 @@ class Player(ABC):
 
 
 class PlayerReal(Player):
+    def __init__(self):
+        super().__init__(PlayerType.REAL)
+
     def get_move(self):
         raise NotImplementedError('Real player does not have get_move logic!')
 
 
 class PlayerAI(Player):
-    def __init__(self, strategy, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, strategy):
+        super().__init__(PlayerType.AI)
         self.strategy = strategy
 
     def get_move(self):
