@@ -166,6 +166,14 @@ class GameBasic(Game):
             if self.score[marker] >= self.game_configs[GameParameter.FIRST_TO]:
                 self._winner = self.marker2player[marker]
                 return
+            msg = '{} ({!r}) wins round {}'
+            msg = msg.format(self.marker2player[marker].name,
+                             self.marker,
+                             self.total_round - 1)
+            self.view.display_msg(msg)
+        else:
+            msg = 'Draw round {}'.format(self.total_round - 1)
+            self.view.display_msg(msg)
 
         maxed_rounds = self.total_round >= self.game_configs[GameParameter.N_ROUNDS]
         if maxed_rounds:
