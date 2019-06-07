@@ -12,7 +12,7 @@ __all__ = [
 class View(ABC):
     def __init__(self, board_displayer):
         self.board_displayer = board_displayer
-        self.logger = utils.make_logger(self.__class__.__name__)
+        self.logger = utils.make_logger(View.__name__)
 
     @abstractmethod
     def update(self, board):
@@ -35,25 +35,31 @@ class TextBoard2dDisplayer:
     EMPTY = '_'
 
     def display(self, board, f=sys.stdout):
+        print('Board', file=f)
         for row in range(board.n_rows):
             s = ''
             for col in range(board.n_cols):
-                if board.is_cell_empty(row, col):
+                loc_str = '{}, {}'.format(row, col)
+                loc = board.CellLocation.parse(loc_str)
+                if board.is_cell_empty(loc):
                     s += str(self.EMPTY)
                 else:
-                    cell = board.get_cell(row, col)
-                    s += str(cell.val.marker)
+                    cell = board.get_cell(loc)
+                    s += repr(cell.content)
             print(s, file=f)
 
 
 class TextView(View):
     def update(self, board):
+        self.logger.debug('Updating view...')
         self.board_displayer.display(board)
 
     def get_input(self, msg=None):
         if msg is not None:
-            self.display_msg(msg)
-        return sys.stdin.rstrip()
+            s = input(msg)
+        else:
+            s = input()
+        return s
 
     def display_msg(self, msg):
         print(msg)

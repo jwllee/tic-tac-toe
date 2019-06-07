@@ -24,7 +24,7 @@ class TestTextBoard2dDisplayer:
         out = io.StringIO()
         displayer.display(board, f=out)
         line = out.getvalue()
-        expected = '{empty}{empty}\n{empty}{empty}\n'
+        expected = 'Board\n{empty}{empty}\n{empty}{empty}\n'
         expected = expected.format(empty=view.TextBoard2dDisplayer.EMPTY)
         assert line == expected
 
@@ -34,7 +34,7 @@ class TestTextBoard2dDisplayer:
         out = io.StringIO()
         displayer.display(board, f=out)
         line = out.getvalue()
-        expected = '{emp}{emp}{emp}\n{emp}{emp}{emp}\n{emp}{emp}{emp}\n'
+        expected = 'Board\n{emp}{emp}{emp}\n{emp}{emp}{emp}\n{emp}{emp}{emp}\n'
         expected = expected.format(emp=view.TextBoard2dDisplayer.EMPTY)
         assert line == expected
 
