@@ -1,8 +1,9 @@
 from enum import Enum
 from abc import ABC, abstractmethod
-from . import board as board_mod
-from . import player as player_mod
 from . import utils
+import logging, logging.config
+from .board import *
+from .player import *
 
 
 __all__ = [
@@ -19,81 +20,108 @@ class GameParameter(Enum):
 
 class Game(ABC):
     def __init__(self, players, game_configs, view):
-        self.logger = utils.make_logger(self.__class__.__name__)
+        self.logger = utils.make_logger(Game.__name__)
         self.players = players
         self.marker2player = dict()
         self.game_configs = game_configs
         self.board = None
         self.view = view
-        self.__marker = board_mod.Marker.CIRCLE
+        self._marker = Marker.CIRCLE
+        self._winner = None
 
     #------------------------------------------------------------ 
     # Properties
     #------------------------------------------------------------ 
     @property
-    def state(self):
-        return self.board.state
-
-    @state.setter
-    def state(self, s):
-        raise NotImplementedError('Cannot set current state!')
-
-    @property
     def marker(self):
-        return self.__marker
+        return self._marker
 
     @marker.setter
     def marker(self, m):
         raise NotImplementedError('Cannot set current marker!')
 
+    @property
+    def winner(self):
+        return self._winner
+
+    @winner.setter
+    def winner(self, w):
+        raise NotImplementedError('Cannot set game winner!')
+
     #------------------------------------------------------------ 
     # Abstract methods
     #------------------------------------------------------------ 
-    @abstractmethod
-    def update_board(self, move):
-        raise NotImplementedError('Please implement this method.')
-
-    def end(self):
-        if self.state == board_mod.BoardState.DRAW:
-            msg = 'Draw game.'
-        else:
-            marker = self.state - board_mod.BoardState.CIRCLE_WIN
-            msg = '{} has won.'.format(marker)
-        self.view.display_msg(msg)
-
     def setup(self):
-        for marker, player in zip(board_mod.Marker, self.players):
+        for marker, player in zip(Marker, self.players):
             player.board = self.board
             player.marker = marker
             self.marker2player[marker] = player
+        self.logger.debug('marker2player: {}'.format(self.marker2player))
+
+    def start_board(self):
+        while self.board.state == BoardState.ONGOING:
+            self.logger.debug('Next round...')
+            cur_player = self.marker2player[self._marker]
+
+            if cur_player.is_real:
+                loc = self.prompt_move(self._marker)
+            else:
+                loc = cur_player.get_move()
+
+            move = Cell(self._marker, loc)
+            self.board.mark_cell(move.content, move.loc)
+
+            if not cur_player.is_real:
+                msg = '{} marked {!r} at {}'
+                msg = msg.format(cur_player.name,
+                                 cur_player.marker,
+                                 loc)
+                self.view.display_msg(msg)
+
+            # increment marker
+            n_markers = len(Marker)
+            self.logger.debug('no. of markers: {}'.format(n_markers))
+            self._marker = Marker((self._marker + 1) % n_markers)
+        self.end_board()
+
+    def end_board(self):
+        # set winner if needed
+        marker_int = self.board.state - BoardState.CIRCLE_WIN
+        if marker_int >= 0:
+            marker = Marker(marker_int)
+            self._winner = self.marker2player[marker]
 
     def start(self):
         self.setup()
-
-        while self.state == board_mod.BoardState.ONGOING:
-            self.logger.debug('Next round...')
-            cur_player = self.marker2player[self.__current_marker]
-
-            if isinstance(cur_player, player_mod.PlayerReal):
-                move = self.prompt_move()
-            else:
-                move = cur_player.get_move()
-
-            self.update_board(move)
-
-            # increment marker
-            self.__marker += 1
-            self.__marker %= len(board_mode.Marker)
-
+        welcome_msg = 'Welcome to Tic Tac Toe'
+        self.view.display_msg(welcome_msg)
+        self.start_board()
         self.end()
 
-    def prompt_move(self):
-        msg = 'Enter move coordinate ({})'
-        msg = msg.format(self.board.coordinate_format)
-        move = None
-        while not self.board.is_move_valid(move):
-            move = self.view.get_input(msg)
-        return move
+    def end(self):
+        self.logger.info('Game end')
+        if self.winner is None:
+            msg = 'Draw game.'
+        else:
+            msg = '{!s} ({!r}) has won.'
+            msg = msg.format(self.winner.name, self.winner.marker)
+        self.view.display_msg(msg)
+
+    def prompt_move(self, marker):
+        msg = 'Enter move coordinate ({}): '
+        msg = msg.format(self.board.CellLocation.COORDINATE_FORMAT)
+        loc = None
+        while loc is None or not self.board.is_cell_empty(loc):
+            loc_str = self.view.get_input(msg)
+            try:
+                loc = self.board.CellLocation.parse(loc_str)
+            except:
+                self.logger.error('Parse location error: {}'.format(loc))
+                loc = None
+                continue
+            is_empty = self.board.is_cell_empty(loc)
+            self.logger.debug('{} is empty: {}'.format(loc, is_empty))
+        return loc
 
 
 class GameBasic(Game):
