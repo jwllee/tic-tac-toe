@@ -51,13 +51,13 @@ class Board(ABC):
     #------------------------------------------------------------ 
     # Observer pattern
     #------------------------------------------------------------ 
-    def register_observer(obs):
+    def register_observer(self, obs):
         self.observers.append(obs)
 
-    def remove_observer(obs):
+    def remove_observer(self, obs):
         self.observers.remove(obs)
 
-    def notify_observers():
+    def notify_observers(self):
         for obs in self.observers:
             obs.update(self)
 
