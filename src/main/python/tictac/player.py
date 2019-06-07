@@ -32,6 +32,14 @@ class Player(ABC):
         self.player_type = player_type
         self.name = petname.generate() if name is None else name
 
+    @property
+    def is_real(self):
+        return self.player_type == PlayerType.REAL
+
+    @is_real.setter
+    def is_real(self):
+        raise NotImplementedError('Cannot set if player is real!')
+
 
 class PlayerReal(Player):
     def __init__(self, name=None):
