@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, IntEnum
 from collections import namedtuple, Counter
 from abc import ABC, abstractmethod
 import numpy as np
@@ -17,12 +17,11 @@ SEP = ','
 Cell = namedtuple('Cell', ['row', 'col', 'val'])
 
 
-class Marker(Enum):
+class Marker(IntEnum):
     def __str__(self):
         return str(self.name).capitalize()
 
-    @property
-    def marker(self):
+    def __repr__(self):
         _map = {
             0: 'o',
             1: 'x'
@@ -33,7 +32,10 @@ class Marker(Enum):
     CROSS = 1
 
 
-class BoardState(Enum):
+class BoardState(IntEnum):
+    def __str__(self):
+        return str(self.name).capitalize()
+
     ONGOING = 0
     DRAW = 1
     CIRCLE_WIN = 2
