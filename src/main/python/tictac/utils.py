@@ -59,6 +59,21 @@ logging.config.dictConfig({
             'level': 'DEBUG',
             'propagate': True
         },
+        'Game': {
+            'handlers': [HandlerType.DEFAULT.name],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+        'Board': {
+            'handlers': [HandlerType.DEFAULT.name],
+            'level': 'DEBUG',
+            'propagate': True
+        },
+        'View': {
+            'handlers': [HandlerType.DEFAULT.name],
+            'level': 'DEBUG',
+            'propagate': True
+        }
     }
 })
 
