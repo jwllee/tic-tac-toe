@@ -2,6 +2,7 @@ from collections import namedtuple
 from abc import ABC, abstractmethod
 from enum import Enum
 from . import board, utils
+import petname
 
 
 LOGGER = utils.make_logger(utils.LoggerType.MINIMAL.name)
@@ -24,24 +25,25 @@ class PlayerType(Enum):
 
 
 class Player(ABC):
-    def __init__(self, player_type):
+    def __init__(self, player_type, name=None):
         utils.assert_isinstance('player_type', PlayerType, player_type)
         self.board = None
         self.marker = None
         self.player_type = player_type
+        self.name = petname.generate() if name is None else name
 
 
 class PlayerReal(Player):
-    def __init__(self):
-        super().__init__(PlayerType.REAL)
+    def __init__(self, name=None):
+        super().__init__(PlayerType.REAL, name=name)
 
     def get_move(self):
         raise NotImplementedError('Real player does not have get_move logic!')
 
 
 class PlayerAI(Player):
-    def __init__(self, strategy):
-        super().__init__(PlayerType.AI)
+    def __init__(self, strategy, name=None):
+        super().__init__(PlayerType.AI, name=name)
         self.strategy = strategy
 
     def get_move(self):
