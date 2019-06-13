@@ -28,6 +28,10 @@ class Marker(IntEnum):
         }
         return _map[self.value]
 
+    @classmethod
+    def next_marker(cls, marker):
+        return Marker((marker + 1) % len(Marker))
+
     CIRCLE = 0
     CROSS = 1
 
@@ -100,9 +104,32 @@ class Board(ABC):
     def state(self, s):
         raise NotImplementedError('Cannot set board state.')
 
+    @property
+    def n_cells(self):
+        raise NotImplementedError('Please implement this method.')
+
+    @n_cells.setter
+    def n_cells(self, n):
+        raise NotImplementedError('Cannot set the number of board cells.')
+
+    @property
+    def has_winner(self):
+        raise NotImplementedError('Please implement this method.')
+
+    @has_winner.setter
+    def has_winner(self, w):
+        raise NotImplementedError('Cannot set if board has winner.')
+
     #------------------------------------------------------------ 
     # Abstract methods
     #------------------------------------------------------------ 
+    @abstractmethod
+    def copy(self, include_observers=False):
+        raise NotImplementedError('Please implement this method.')
+
+    @abstractmethod
+    def copy(self):
+        raise NotImplementedError('Please implement this method.')
     @abstractmethod
     def restart(self):
         raise NotImplementedError('Please implement this method.')
@@ -135,6 +162,14 @@ class Board(ABC):
     def mark_cell(self, marker, loc):
         raise NotImplementedError('Please implement this method.') 
 
+    @abstractmethod
+    def unmark_cell(self, marker, loc):
+        raise NotImplementedError('Please implement this method.')
+
+    @abstractmethod
+    def is_winner(self, marker):
+        raise NotImplementedError('Please implement this method.')
+
 
 class Board2d(Board):
     class CellLocation(CellLocation):
@@ -163,6 +198,19 @@ class Board2d(Board):
         def __str__(self):
             return '({}, {})'.format(self.row, self.col)
 
+        def __repr__(self):
+            return '({}, {})'.format(self.row, self.col)
+
+        def __eq__(self, other):
+            utils.assert_isinstance('cell location', Board2d.CellLocation, other)
+            return self.row == other.row and self.col == other.col
+
+        def __neq__(self, other):
+            return not self == other
+
+        def __hash__(self):
+            return hash((0, self.row)) + hash((1, self.col))
+
     def __init__(self, n_rows, n_cols):
         super().__init__()
         err_msg = 'Basic tic-tac-toe board has equal no. of rows and cols!'
@@ -172,6 +220,27 @@ class Board2d(Board):
         self.board = np.full((self.n_rows, self.n_cols), np.nan)
         self.row_count = np.full((len(Marker), self.n_rows), 0)
         self.col_count = np.full((len(Marker), self.n_cols), 0)
+
+    @property
+    def n_cells(self):
+        return self.board.size
+
+    @property
+    def has_winner(self):
+        return self.state - BoardState.CIRCLE_WIN >= 0
+
+    def copy(self, include_observers=False):
+        copied = Board2d(self.n_rows, self.n_cols)
+        copied._state = self._state
+        copied.board = self.board.copy()
+        copied.row_count = self.row_count.copy()
+        copied.col_count = self.col_count.copy()
+
+        if include_observers:
+            for obs in self.observers:
+                copied.register_observer(obs)
+
+        return copied
 
     def restart(self):
         self.board = np.full((self.n_rows, self.n_cols), np.nan)
@@ -242,16 +311,36 @@ class Board2d(Board):
             self.col_count[marker, col] += 1
             self.logger.debug('row count: \n{}'.format(self.row_count))
             self.logger.debug('col count: \n{}'.format(self.col_count))
-            self.__update_state(row, col)
+            self.update_state(row, col)
             # update observers
             self.notify_observers()
             return True
-    #------------------------------------------------------------ 
+
+    def unmark_cell(self, marker, loc):
+        utils.assert_isinstance('marker', Marker, marker)
+        utils.assert_isinstance('cell location', self.CellLocation, loc)
+
+        row, col = loc.row, loc.col
+        # check if that cell is in fact marked
+        if np.isnan(self.board[row, col]):
+            raise ValueError('Cell at {} is not marked.'.format(loc))
+
+        self.board[row, col] = np.nan
+        self.row_count[marker, row] -= 1
+        self.col_count[marker, col] -= 1
+        self._state = BoardState.ONGOING
+        self.eval_state()
+        self.notify_observers()
+
+    def is_winner(self, marker):
+        winner_int = self.state - BoardState.CIRCLE_WIN
+        return winner_int >= 0 and Marker(winner_int) == marker
 
     def get_diag_count(self, start_ind, left2right=True):
         if left2right:
             diag = np.diag(self.board, start_ind)
         else:
+            start_ind = self.n_rows - 1 - start_ind
             diag = np.diag(np.fliplr(self.board), start_ind)
 
         diag_dict = dict()
@@ -261,9 +350,8 @@ class Board2d(Board):
 
         return diag_dict
 
-    def __update_state(self, row, col):
-        self.logger.debug('Updating board state')
-        # 1. check row 
+    def check_row(self, row):
+        has_winner = False
         winner = np.where(self.row_count[:, row] == self.n_rows)[0]
         self.logger.debug('Winner at row {}: {}'.format(row, winner))
         if winner.shape[0] > 0:
@@ -272,9 +360,11 @@ class Board2d(Board):
             msg = '"{!r}" win at row {}'
             msg = msg.format(marker, row)
             self.logger.debug(msg)
-            return
+            has_winner = True
+        return has_winner
 
-        # 2. check col
+    def check_col(self, col):
+        has_winner = False
         winner = np.where(self.col_count[:, col] == self.n_cols)[0]
         if winner.shape[0] > 0:
             marker = Marker(winner[0])
@@ -282,28 +372,68 @@ class Board2d(Board):
             msg = '"{!r}" win at col {}'
             msg = msg.format(marker, col)
             self.logger.debug(msg)
-            return 
+            has_winner = True
+        return has_winner
+
+    def check_diagonal(self, left2right=True):
+        has_winner = False
+        if left2right:
+            diag_count = self.get_diag_count(0)
+            for marker in Marker:
+                if diag_count[marker] == self.n_rows:
+                    self._state = BoardState(BoardState.CIRCLE_WIN + marker)
+                    msg = '"{!r}" win at diagonal'.format(marker)
+                    self.logger.debug(msg)
+                    has_winner = True
+        else:
+            diag_count = self.get_diag_count(self.n_rows - 1, False)
+            for marker in Marker:
+                if diag_count[marker] == self.n_rows:
+                    self._state = BoardState(BoardState.CIRCLE_WIN + marker)
+                    msg = '"{!r}" win at diagonal'.format(marker)
+                    self.logger.debug(msg)
+                    has_winner = True
+        return has_winner
+
+    def eval_state(self):
+        # check rows
+        for row in range(self.n_rows):
+            if self.check_row(row):
+                return
+
+        # check cols
+        for col in range(self.n_cols):
+            if self.check_col(col):
+                return
+
+        # check diagonals
+        if self.check_diagonal():
+            return
+
+        if self.check_diagonal(False):
+            return
+
+        if self.full:
+            self._state = BoardState.DRAW
+
+    def update_state(self, row, col):
+        self.logger.debug('Updating board state')
+        # 1. check row 
+        if self.check_row(row):
+            return
+
+        # 2. check col
+        if self.check_col(col):
+            return
 
         # 3. check diagonals
-        if row == col: # left to right diagonal
-            diag_count = self.get_diag_count(0)
-            
-            for marker in Marker:
-                if diag_count[marker] == self.n_rows:
-                    self._state = BoardState(BoardState.CIRCLE_WIN + marker)
-                    msg = '"{!r}" win at diagonal'.format(marker)
-                    self.logger.debug(msg)
-                    return
-
-        elif row + col == self.n_rows - 1: # right to left diagonal
-            diag_count = self.get_diag_count(self.n_rows - 1)
-
-            for marker in Marker:
-                if diag_count[marker] == self.n_rows:
-                    self._state = BoardState(BoardState.CIRCLE_WIN + marker)
-                    msg = '"{!r}" win at diagonal'.format(marker)
-                    self.logger.debug(msg)
-                    return
+        # left to right diagonal
+        if row == col and self.check_diagonal(): 
+            return
+        # right to left diagonal
+        elif row + col == self.n_rows - 1 and self.check_diagonal(False):
+            self.logger.debug('Checking right to left diagonal.')
+            return
 
         # 4. check if there is any more empty cells
         if self.full:
