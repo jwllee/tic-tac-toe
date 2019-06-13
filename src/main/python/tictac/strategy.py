@@ -50,7 +50,7 @@ class MinimaxStrategy2p(Strategy):
         super().__init__(StrategyType.MINIMAX)
         self.best_move_loc = None
         self.n_explored_states = 0
-
+    
     def get_move(self, board, marker):
         copy = board.copy(include_observers=False)
         self.n_explored_states = 0
@@ -79,9 +79,10 @@ class MinimaxStrategy2p(Strategy):
         start = time.time()
 
         for cell in empty_cells:
-            board.mark_cell(marker, cell.loc)
+            board.mark_cell(marker, cell.loc) 
             # self.logger.info('Marked {!r} for player "{!r}"'.format(cell.loc, marker))
-            minimax_v = self.minimax(board, 1, next_marker, marker)
+            minimax_v = self.minimax_r(board, 1, next_marker, marker)
+            # minimax_v = self.minimax(board, next_marker, marker)
             if minimax_v > best_score:
                 best_score = minimax_v
                 best_move_loc = cell.loc
@@ -92,7 +93,7 @@ class MinimaxStrategy2p(Strategy):
 
         return best_move_loc
 
-    def minimax(self, board, depth, cur_marker, marker):
+    def minimax_r(self, board, depth, cur_marker, marker):
         self.n_explored_states += 1
         # if self.n_explored_states % 5000 == 0:
         #     self.logger.info('Explored {} states'.format(self.n_explored_states))
@@ -102,7 +103,7 @@ class MinimaxStrategy2p(Strategy):
         max_score = self.get_max_score(board)
         if score == max_score:
             return score
-
+        
         if score == -max_score:
             return score
 
@@ -116,7 +117,7 @@ class MinimaxStrategy2p(Strategy):
 
         for cell in empty_cells:
             board.mark_cell(cur_marker, cell.loc)
-            minimax_v = self.minimax(board, depth + 1, next_marker, marker)
+            minimax_v = self.minimax_r(board, depth + 1, next_marker, marker)
             aux = best_score
             if is_max:
                 best_score = max(best_score, minimax_v)
@@ -130,3 +131,58 @@ class MinimaxStrategy2p(Strategy):
             board.unmark_cell(cur_marker, cell.loc)
 
         return best_score
+
+    def minimax(self, board, cur_marker, marker):
+        if board.state != BoardState.ONGOING:
+            return self.utility(board, marker)
+
+        # DFS with recurse back
+        empty_cells = board.get_empty_cells()
+        # np.random.shuffle(empty_cells)
+        is_max = cur_marker == marker
+        minimax = [-np.inf] if is_max else [np.inf]
+        node_stack = [(
+            None, # move that got to this state
+            iter(empty_cells),
+            minimax, # minimax value
+            None, # marker for move
+            cur_marker
+        )]
+
+        while node_stack:
+            last_loc, children, minimax, last_marker, cur_marker = node_stack[-1]
+            try:
+                loc = next(children).loc
+                board.mark_cell(cur_marker, loc)
+                # self.logger.info('Marking {!r} for player "{!r}"'.format(loc, cur_marker))
+                next_marker = Marker.next_marker(cur_marker)
+                is_max = next_marker == marker
+                minimax_1 = [-np.inf] if is_max else [np.inf]
+                empty_cells = board.get_empty_cells()
+                # np.random.shuffle(empty_cells)
+                node = (
+                    loc, iter(empty_cells), 
+                    minimax_1, cur_marker, next_marker
+                )
+                node_stack.append(node)
+            except:
+                if board.state != BoardState.ONGOING:
+                    # terminal state
+                    utility = self.utility(board, marker)
+                else:
+                    utility = minimax[0]
+
+                node_stack.pop(-1)
+
+                if node_stack:
+                    # update parent's minimax
+                    is_max = last_marker == marker
+                    parent = node_stack[-1]
+                    if is_max:
+                        parent[2][0] = max(parent[2][0], utility)
+                    else:
+                        parent[2][0] = min(parent[2][0], utility)
+                    board.unmark_cell(last_marker, last_loc)
+                    # self.logger.info('Unmarking {!r} for player "{!r}"'.format(last_loc, last_marker))
+                else:
+                    return utility
