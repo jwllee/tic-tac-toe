@@ -73,7 +73,12 @@ logging.config.dictConfig({
             'handlers': [HandlerType.DEFAULT.name],
             'level': 'DEBUG',
             'propagate': True
-        }
+        },
+        'Strategy': {
+            'handlers': [HandlerType.DEFAULT.name],
+            'level': 'DEBUG',
+            'propagate': True
+        },
     }
 })
 
