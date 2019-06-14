@@ -12,7 +12,7 @@ LOGGER = utils.make_logger(utils.LoggerType.MINIMAL.name)
 __all__ = [
     'StrategyType',
     'RandomStrategy',
-    'MinimaxStrategy2p'
+    'MinimaxStrategy'
 ]
 
 
@@ -45,7 +45,7 @@ class RandomStrategy(Strategy):
         return cell.loc
 
 
-class MinimaxStrategy2p(Strategy):
+class MinimaxStrategy(Strategy):
     def __init__(self):
         super().__init__(StrategyType.MINIMAX)
         self.best_move_loc = None
