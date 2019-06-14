@@ -4,6 +4,7 @@ from . import utils
 import logging, logging.config
 from .board import *
 from .player import *
+import numpy as np
 
 
 __all__ = [
