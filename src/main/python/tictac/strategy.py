@@ -143,7 +143,7 @@ class MinimaxStrategy(Strategy):
         if len(node_stack) > 1 and self.prune:
             # self.logger.info('List length: {}'.format(len(node_stack)))
             parent = node_stack[-2]
-            minimax_p = parent[2]
+            minimax_p = parent[3]
             lower_larger_than_par_upper = is_max and minimax[1] < minimax_p[0]
             upper_less_than_par_lower = not is_max and minimax[0] > minimax_p[1]
 
@@ -168,6 +168,7 @@ class MinimaxStrategy(Strategy):
         # minimax = [-np.inf] if is_max else [np.inf]
         minimax = [-np.inf, np.inf]
         node_stack = [(
+            0, # depth
             None, # move that got to this state
             empty_cells,
             minimax, # minimax value
@@ -176,7 +177,7 @@ class MinimaxStrategy(Strategy):
         )]
 
         while node_stack:
-            last_loc, children, minimax, last_marker, cur_marker = node_stack[-1]
+            depth, last_loc, children, minimax, last_marker, cur_marker = node_stack[-1]
 
             try:
                 loc = children.pop().loc
@@ -204,7 +205,7 @@ class MinimaxStrategy(Strategy):
                 # minimax_1 = [-np.inf] if is_max else [np.inf]
                 # np.random.shuffle(empty_cells)
                 node = (
-                    loc, empty_cells, 
+                    depth + 1, loc, empty_cells, 
                     minimax_1, cur_marker, next_marker
                 )
                 node_stack.append(node)
@@ -227,8 +228,8 @@ class MinimaxStrategy(Strategy):
                     # update parent's minimax
                     is_max = last_marker == marker
                     parent = node_stack[-1]
-                    children_p = parent[1]
-                    minimax_p = parent[2]
+                    children_p = parent[2]
+                    minimax_p = parent[3]
                     if is_max:
                         # parent[2][0] = max(parent[2][0], utility)
                         minimax_p[0] = max(minimax_p[0], utility)
