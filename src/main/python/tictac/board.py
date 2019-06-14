@@ -128,8 +128,9 @@ class Board(ABC):
         raise NotImplementedError('Please implement this method.')
 
     @abstractmethod
-    def copy(self):
+    def __hash__(self):
         raise NotImplementedError('Please implement this method.')
+
     @abstractmethod
     def restart(self):
         raise NotImplementedError('Please implement this method.')
@@ -241,6 +242,9 @@ class Board2d(Board):
                 copied.register_observer(obs)
 
         return copied
+
+    def __hash__(self):
+        return hash(self.board.data.tobytes())
 
     def restart(self):
         self.board = np.full((self.n_rows, self.n_cols), np.nan)
