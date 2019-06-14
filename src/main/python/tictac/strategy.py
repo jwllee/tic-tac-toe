@@ -46,12 +46,13 @@ class RandomStrategy(Strategy):
 
 
 class MinimaxStrategy(Strategy):
-    def __init__(self, prune=True):
+    def __init__(self, prune=True, cache=True):
         super().__init__(StrategyType.MINIMAX)
         self.best_move_loc = None
         self.n_explored_states = 0
         self.n_pruned = 0
         self.prune = prune
+        self.cache = cache
         self.transposition_table = dict()
     
     def get_move(self, board, marker):
@@ -138,6 +139,24 @@ class MinimaxStrategy(Strategy):
 
         return best_score
 
+    def pruneable(self, node_stack, minimax, is_max):
+        if len(node_stack) > 1 and self.prune:
+            # self.logger.info('List length: {}'.format(len(node_stack)))
+            parent = node_stack[-2]
+            minimax_p = parent[2]
+            lower_larger_than_par_upper = is_max and minimax[1] < minimax_p[0]
+            upper_less_than_par_lower = not is_max and minimax[0] > minimax_p[1]
+
+            if lower_larger_than_par_upper or upper_less_than_par_lower:
+                # self.logger.info('Pruned {!r} for player "{!r}"'.format(last_loc, last_marker))
+                # can prune this state without looking at child
+                self.n_pruned += 1
+                if self.n_pruned % 1000 == 0:
+                    self.logger.info('Pruned {} states'.format(self.n_pruned))
+                children.clear()
+                return True
+        return False
+
     def minimax(self, board, cur_marker, marker):
         if board.state != BoardState.ONGOING:
             return self.utility(board, marker)
@@ -162,31 +181,17 @@ class MinimaxStrategy(Strategy):
             try:
                 loc = children.pop().loc
                 # has children, decide whether if we can prune this state
-                if len(node_stack) > 1 and self.prune:
-                    # self.logger.info('List length: {}'.format(len(node_stack)))
-                    parent = node_stack[-2]
-                    is_max = last_marker == marker
-                    minimax_p = parent[2]
-                    lower_larger_than_par_upper = is_max and minimax[1] < minimax_p[0]
-                    upper_less_than_par_lower = not is_max and minimax[0] > minimax_p[1]
-
-                    if lower_larger_than_par_upper or upper_less_than_par_lower:
-                        # self.logger.info('Pruned {!r} for player "{!r}"'.format(last_loc, last_marker))
-                        # can prune this state without looking at child
-                        self.n_pruned += 1
-                        if self.n_pruned % 1000 == 0:
-                            self.logger.info('Pruned {} states'.format(self.n_pruned))
-                        children.clear()
-                        continue
+                is_max = last_marker == marker
+                if self.pruneable(node_stack, minimax, is_max):
+                    continue
 
                 board.mark_cell(cur_marker, loc)
                 self.n_explored_states += 1
 
                 # check whether if we have already seen this state
                 is_max = cur_marker == marker
-                board_hash = hash(board)
-                key = (board_hash, is_max)
-                if key in self.transposition_table:
+                key = (hash(board), is_max)
+                if self.cache and key in self.transposition_table:
                     utility = self.transposition_table[key]
                     minimax_1 = [utility, utility]
                     empty_cells = []
@@ -211,9 +216,10 @@ class MinimaxStrategy(Strategy):
                     utility = minimax[1] if is_max else minimax[0]
 
                     # store the non-terminal state in transposition table
-                    is_max = last_marker == marker
-                    key = (hash(board), is_max)
-                    self.transposition_table[key] = utility
+                    if self.cache:
+                        is_max = last_marker == marker
+                        key = (hash(board), is_max)
+                        self.transposition_table[key] = utility
 
                 node_stack.pop(-1)
 
