@@ -169,7 +169,7 @@ class GameBasic(Game):
                 return
             msg = '{} ({!r}) wins round {}'
             msg = msg.format(self.marker2player[marker].name,
-                             self.marker,
+                             marker,
                              self.total_round - 1)
             self.view.display_msg(msg)
         else:
