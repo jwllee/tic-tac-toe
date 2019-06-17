@@ -223,9 +223,6 @@ class GameBasic(Game):
         msg = msg.format(round_winner, marker, self.total_round - 1)
         return msg
 
-    def do_move(self, loc_str):
-        super().do_move(loc_str)
-
     def end_board(self):
         self.total_round += 1
         marker_int = self.board.state - BoardState.CIRCLE_WIN
