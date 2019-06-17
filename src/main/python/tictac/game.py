@@ -113,7 +113,7 @@ class Game(ABC):
         self.setup()
         self.prompt_move()
 
-    def get_result_msg():
+    def get_result_msg(self):
         if self.ongoing:
             raise ValueError('Game is still ongoing!')
         if self.winner is None:
