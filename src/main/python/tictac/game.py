@@ -40,9 +40,9 @@ class Game(ABC):
     def remove_observer(self, obs):
         self.observers.remove(obs)
 
-    def notify_observers(self, _type, data):
+    def notify_observers(self, type_, data):
         for obs in self.observers:
-            obs.update(_type, data)
+            obs.update(type_, data)
 
     #------------------------------------------------------------ 
     # Properties
