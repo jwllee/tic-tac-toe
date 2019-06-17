@@ -66,12 +66,12 @@ class MinimaxStrategy(Strategy):
         # max depth is just the number of cells in board
         return board.n_cells + 1
 
-    def utility(self, board, marker):
+    def utility(self, board, marker, depth=0):
         max_score = self.get_max_score(board)
         if board.is_winner(marker):
-            return max_score
+            return max_score - depth
         elif board.has_winner:
-            return -max_score
+            return -(max_score - depth)
         else: # either draw or ongoing
             return 0
 
@@ -94,9 +94,9 @@ class MinimaxStrategy(Strategy):
             board.unmark_cell(marker, cell.loc)
 
         took = time.time() - start
-        self.logger.info('Took {:.2f}s for {} states'.format(took, self.n_explored_states))
+        # self.logger.info('Took {:.2f}s for {} states'.format(took, self.n_explored_states))
         table_size = sys.getsizeof(self.transposition_table)
-        self.logger.info('Transposition table size: {:.0f}b'.format(table_size))
+        # self.logger.info('Transposition table size: {:.0f}b'.format(table_size))
 
         return best_move_loc
 
@@ -212,7 +212,7 @@ class MinimaxStrategy(Strategy):
             except:
                 if board.state != BoardState.ONGOING:
                     # terminal state
-                    utility = self.utility(board, marker)
+                    utility = self.utility(board, marker, depth)
                 else:
                     utility = minimax[1] if is_max else minimax[0]
 
