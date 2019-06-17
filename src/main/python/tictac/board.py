@@ -193,6 +193,7 @@ class Board2d(Board):
 
         @classmethod
         def parse(self, s):
+            s = s.replace('(', '').replace(')', '')
             row, col = s.split(SEP)
             return Board2d.CellLocation(int(row), int(col))
 
