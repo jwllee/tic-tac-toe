@@ -64,18 +64,20 @@ class TextView(View):
     def display_msg(self, msg):
         print(msg)
 
-    def get_choice_input(self, choices, msg=''):
-        msg = 'Enter choice:'
-        self.display_msg(msg)
+    def get_choice_input(self, choices, name=''):
+        header = '------------------------------{}------------------------------\n'.format(name)
+        self.display_msg(header)
+        footer = '-' * (len(header) - 1)
 
         while True:
             for i, c in enumerate(choices):
-                msg = '{}: {}'.format(i, str(c))
+                msg = '{}. {}'.format(i + 1, str(c))
                 self.display_msg(msg)
+            self.display_msg(footer)
 
-            line = sys.stdin.rstrip()
+            line = self.get_input('Select: ')
             try:
-                i = int(line)
+                i = int(line) - 1
                 if i in range(len(choices)):
                     return list(choices)[i]
             except:
@@ -83,5 +85,4 @@ class TextView(View):
                 self.logger.debug(err_msg)
                 self.display_msg(err_msg)
 
-            msg = 'Re-enter choice:'
-            self.display_msg(msg)
+            self.display_msg(header)
