@@ -217,7 +217,7 @@ class MinimaxStrategy(Strategy):
                     utility = minimax[1] if is_max else minimax[0]
 
                     # store the non-terminal state in transposition table
-                    if self.cache:
+                    if self.cache and last_marker is not None:
                         is_max = last_marker == marker
                         key = (hash(board), is_max)
                         self.transposition_table[key] = utility
