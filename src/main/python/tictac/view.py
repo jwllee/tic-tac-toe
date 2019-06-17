@@ -32,20 +32,20 @@ class View(ABC):
 
 
 class TextBoard2dDisplayer:
-    EMPTY = '_'
+    EMPTY = '-'
 
     def display(self, board, f=sys.stdout):
         print('Board', file=f)
         for row in range(board.n_rows):
-            s = ''
+            s = ' '
             for col in range(board.n_cols):
                 loc_str = '{}, {}'.format(row, col)
                 loc = board.CellLocation.parse(loc_str)
                 if board.is_cell_empty(loc):
-                    s += str(self.EMPTY)
+                    s += str(self.EMPTY) + ' '
                 else:
                     cell = board.get_cell(loc)
-                    s += repr(cell.content)
+                    s += repr(cell.content) + ' '
             print(s, file=f)
 
 
