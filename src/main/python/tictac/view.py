@@ -2,6 +2,8 @@ from . import utils
 from abc import ABC, abstractmethod
 import sys
 
+from utils import NotificationKey, NotificationType
+
 
 __all__ = [
     'TextBoard2dDisplayer',
@@ -52,7 +54,7 @@ class TextBoard2dDisplayer:
 class TextView(View):
     def update(self, _type, data):
         self.logger.debug('Updating view...')
-        board = data[utils.NotificationKey.STATE]
+        board = data[NotificationKey.STATE]
         self.board_displayer.display(board)
 
     def get_input(self, msg=None):

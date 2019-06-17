@@ -3,6 +3,7 @@ from collections import namedtuple, Counter
 from abc import ABC, abstractmethod, abstractclassmethod
 import numpy as np
 from . import utils
+from utils import NotificationKey, NotificationType
 
 
 __all__ = [
@@ -318,8 +319,8 @@ class Board2d(Board):
             self.logger.debug('col count: \n{}'.format(self.col_count))
             self.update_state(row, col)
             # update observers
-            data = { utils.NotificationKey.STATE: self }
-            self.notify_observers(utils.NotificationType.STATE, data)
+            data = { NotificationKey.STATE: self }
+            self.notify_observers(NotificationType.STATE, data)
             return True
 
     def unmark_cell(self, marker, loc):
@@ -336,8 +337,8 @@ class Board2d(Board):
         self.col_count[marker, col] -= 1
         self._state = BoardState.ONGOING
         self.eval_state()
-        data = { utils.NotificationKey.STATE: self }
-        self.notify_observers(utils.NotificationType.STATE, data)
+        data = { NotificationKey.STATE: self }
+        self.notify_observers(NotificationType.STATE, data)
 
     def is_winner(self, marker):
         winner_int = self.state - BoardState.CIRCLE_WIN

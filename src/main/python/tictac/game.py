@@ -6,6 +6,8 @@ from .board import *
 from .player import *
 import numpy as np
 
+from utils import NotificationKey, NotificationType
+
 
 __all__ = [
     'GameParameter',
@@ -96,11 +98,11 @@ class Game(ABC):
         msg = 'Enter move coordinate ({}): '
         msg = msg.format(self.board.CellLocation.COORDINATE_FORMAT)
         data = {
-            utils.NotificationKey.MESSAGE: msg,
-            utils.NotificationKey.MARKER: self.cur_marker,
-            utils.NotificationKey.PLAYER: self.cur_player
+            NotificationKey.MESSAGE: msg,
+            NotificationKey.MARKER: self.cur_marker,
+            NotificationKey.PLAYER: self.cur_player
         }
-        self.notify_observers(utils.NotificationType.PLAYER_MOVE, data)
+        self.notify_observers(NotificationType.PLAYER_MOVE, data)
 
     def start(self):
         self.setup()
@@ -154,8 +156,8 @@ class Game(ABC):
         self._marker = Marker((self._marker + 1) % n_markers)
 
         if not self.ongoing:
-            data = { utils.NotificationKey.MESSAGE: self.get_result_msg() }
-            self.notify_observers(utils.NotificationType.MESSAGE, data)
+            data = { NotificationKey.MESSAGE: self.get_result_msg() }
+            self.notify_observers(NotificationType.MESSAGE, data)
         elif not self.cur_player.is_real:
             loc = self.cur_player.get_move()
             self.logger.info('AI player move loc: {}'.format(str(loc)))
@@ -238,8 +240,8 @@ class GameBasic(Game):
         else:
             msg = 'Draw round {}'.format(self.total_round - 1)
 
-        data = { utils.NotificationKey.MESSAGE: msg }
-        self.notify_observers(utils.NotificationType.MESSAGE, data)
+        data = { NotificationKey.MESSAGE: msg }
+        self.notify_observers(NotificationType.MESSAGE, data)
 
         reached_max_rounds = self.total_round >= self.game_configs[GameParameter.N_ROUNDS]
         if not reached_max_rounds:

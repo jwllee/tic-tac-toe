@@ -5,7 +5,9 @@ import logging, logging.config
 __all__ = [
     'FormatType',
     'HandlerType',
-    'LoggerType'
+    'LoggerType', 
+    'NotificationType',
+    'NotificationKey'
 ]
 
 
