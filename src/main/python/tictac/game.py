@@ -220,7 +220,7 @@ class GameBasic(Game):
     def get_round_msg(self, marker):
         msg = '{} ({!r}) wins round {}'
         round_winner = self.marker2player[marker]
-        msg = msg.format(round_winner, marker, self.total_round - 1)
+        msg = msg.format(round_winner.name, marker, self.total_round - 1)
         return msg
 
     def end_board(self):
