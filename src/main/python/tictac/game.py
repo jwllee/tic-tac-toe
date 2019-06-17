@@ -123,6 +123,12 @@ class Game(ABC):
             msg = msg.format(self.winner.name, self.winner.marker)
         return msg
 
+    def end_board(self):
+        data = { NotificationKey.MESSAGE: self.get_result_msg() }
+        self.notify_observers(NotificationType.MESSAGE, data)
+        # notify end game
+        self.notify_observers(NotificationType.STATE, {})
+
     def do_move(self, loc_str):
         if not self.ongoing:
             raise ValueError('Game not ongoing!')
@@ -156,8 +162,7 @@ class Game(ABC):
         self._marker = Marker((self._marker + 1) % n_markers)
 
         if not self.ongoing:
-            data = { NotificationKey.MESSAGE: self.get_result_msg() }
-            self.notify_observers(NotificationType.MESSAGE, data)
+            self.end_board()
         else:
             self.prompt_move()
 
@@ -221,11 +226,7 @@ class GameBasic(Game):
     def do_move(self, loc_str):
         super().do_move(loc_str)
 
-        # might have to advance game round
-        if not self.ongoing:
-            self.end_round()
-
-    def end_round(self):
+    def end_board(self):
         self.total_round += 1
         marker_int = self.board.state - BoardState.CIRCLE_WIN
         if marker_int >= 0:
