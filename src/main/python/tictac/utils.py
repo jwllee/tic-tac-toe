@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, IntEnum
 import logging, logging.config
 
 
@@ -11,13 +11,13 @@ __all__ = [
 ]
 
 
-class NotificationType(Enum):
+class NotificationType(IntEnum):
     MESSAGE = 1
     STATE = 2
     PLAYER_MOVE = 3
 
 
-class NotificationKey(Enum):
+class NotificationKey(IntEnum):
     MESSAGE = 1
     STATE = 2
     MARKER = 3
