@@ -15,7 +15,7 @@ class View(ABC):
         self.logger = utils.make_logger(View.__name__)
 
     @abstractmethod
-    def update(self, board):
+    def update(self, _type, data):
         raise NotImplementedError('Please implement this method.')
 
     @abstractmethod
@@ -50,8 +50,9 @@ class TextBoard2dDisplayer:
 
 
 class TextView(View):
-    def update(self, board):
+    def update(self, _type, data):
         self.logger.debug('Updating view...')
+        board = data[utils.NotificationKey.STATE]
         self.board_displayer.display(board)
 
     def get_input(self, msg=None):

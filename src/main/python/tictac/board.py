@@ -89,9 +89,9 @@ class Board(ABC):
     def remove_observer(self, obs):
         self.observers.remove(obs)
 
-    def notify_observers(self):
+    def notify_observers(self, _type, data):
         for obs in self.observers:
-            obs.update(self)
+            obs.update(_type, data)
 
     #------------------------------------------------------------ 
     # Properties
@@ -317,7 +317,8 @@ class Board2d(Board):
             self.logger.debug('col count: \n{}'.format(self.col_count))
             self.update_state(row, col)
             # update observers
-            self.notify_observers()
+            data = { utils.NotificationKey.STATE: self }
+            self.notify_observers(utils.NotificationType.STATE, data)
             return True
 
     def unmark_cell(self, marker, loc):
@@ -334,7 +335,8 @@ class Board2d(Board):
         self.col_count[marker, col] -= 1
         self._state = BoardState.ONGOING
         self.eval_state()
-        self.notify_observers()
+        data = { utils.NotificationKey.STATE: self }
+        self.notify_observers(utils.NotificationType.STATE, data)
 
     def is_winner(self, marker):
         winner_int = self.state - BoardState.CIRCLE_WIN

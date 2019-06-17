@@ -9,6 +9,19 @@ __all__ = [
 ]
 
 
+class NotificationType(Enum):
+    MESSAGE = 1
+    STATE = 2
+    PLAYER_MOVE = 3
+
+
+class NotificationKey(Enum):
+    MESSAGE = 1
+    STATE = 2
+    MARKER = 3
+    PLAYER = 4
+
+
 class FormatType(Enum):
     STANDARD = 1
     MINIMAL = 2
