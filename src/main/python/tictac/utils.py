@@ -94,6 +94,11 @@ logging.config.dictConfig({
             'level': 'DEBUG',
             'propagate': True
         },
+        'MainWindow': {
+            'handlers': [HandlerType.DEFAULT.name],
+            'level': 'DEBUG',
+            'propagate': True
+        },
     }
 })
 
