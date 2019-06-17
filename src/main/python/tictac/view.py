@@ -68,9 +68,9 @@ class TextView(View):
         print(msg)
 
     def get_choice_input(self, choices, name=''):
-        header = '------------------------------{}------------------------------\n'.format(name)
+        header = '------------------------------{}------------------------------'.format(name)
         self.display_msg(header)
-        footer = '-' * (len(header) - 1)
+        footer = '-' * len(header)
 
         while True:
             for i, c in enumerate(choices):
