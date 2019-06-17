@@ -92,26 +92,26 @@ class Game(ABC):
             player.board = self.board
             player.marker = marker
             self.marker2player[marker] = player
+        self._marker = Marker.CIRCLE
         self.logger.debug('marker2player: {}'.format(self.marker2player))
 
-    def prompt_move(self, marker):
-        msg = 'Enter move coordinate ({}): '
-        msg = msg.format(self.board.CellLocation.COORDINATE_FORMAT)
-        data = {
-            NotificationKey.MESSAGE: msg,
-            NotificationKey.MARKER: self.cur_marker,
-            NotificationKey.PLAYER: self.cur_player
-        }
-        self.notify_observers(NotificationType.PLAYER_MOVE, data)
+    def prompt_move(self):
+        if self.cur_player.is_real:
+            msg = 'Enter move coordinate ({}): '
+            msg = msg.format(self.board.CellLocation.COORDINATE_FORMAT)
+            data = {
+                NotificationKey.MESSAGE: msg,
+                NotificationKey.MARKER: self.cur_marker,
+                NotificationKey.PLAYER: self.cur_player
+            }
+            self.notify_observers(NotificationType.PLAYER_MOVE, data)
+        else:
+            loc = self.cur_player.get_move()
+            self.do_move(str(loc))
 
     def start(self):
         self.setup()
-        if not self.cur_player.is_real:
-            loc = self.cur_player.get_move()
-            self.logger.info('AI player move loc: {}'.format(str(loc)))
-            self.do_move(str(loc))
-        else:
-            self.prompt_move(self.cur_marker)
+        self.prompt_move()
 
     def get_result_msg():
         if self.ongoing:
@@ -135,11 +135,11 @@ class Game(ABC):
         except:
             self.logger.error('Parse location error: {}'.format(loc_str))
             # prompt move again
-            self.prompt_move(self.cur_marker)
+            self.prompt_move()
             return 
 
         if not self.board.is_cell_empty(loc):
-            self.prompt_move(self.cur_marker)
+            self.prompt_move()
             return
 
         self.board.mark_cell(self.cur_marker, loc)
@@ -158,12 +158,8 @@ class Game(ABC):
         if not self.ongoing:
             data = { NotificationKey.MESSAGE: self.get_result_msg() }
             self.notify_observers(NotificationType.MESSAGE, data)
-        elif not self.cur_player.is_real:
-            loc = self.cur_player.get_move()
-            self.logger.info('AI player move loc: {}'.format(str(loc)))
-            self.do_move(str(loc))
         else:
-            self.prompt_move(self.cur_marker)
+            self.prompt_move()
 
     def restart(self):
         self._marker = Marker.CIRCLE
@@ -247,9 +243,9 @@ class GameBasic(Game):
         if not reached_max_rounds:
             # game not finished yet, restart board
             self.board.restart()
-            if not self.cur_player.is_real:
-                loc = self.cur_player.get_move()
-                self.do_move(str(loc))
+            self.prompt_move()
+        else:
+            self.notify_observers(NotificationType.STATE, {})
 
     def restart(self):
         super().restart()
