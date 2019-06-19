@@ -55,7 +55,9 @@ RUN useradd --home-dir $HOME jonny \
 
 RUN apt-get update && apt-get install -y \
 	libgl1-mesa-glx \
-	qtbase5-dev
+	qt5-default \
+	qtbase5-dev \
+	qttools5-dev-tools
 
 # fpm package manager required by fps to freeze qt applications in linux
 RUN apt-get update && apt-get install -y \
