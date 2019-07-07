@@ -1,5 +1,5 @@
 from fbs_runtime.application_context import ApplicationContext
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QWidget
 from enum import IntEnum
 from tictac import utils
 from tictac.game import *
@@ -103,7 +103,23 @@ def run_gui_mode():
     logger.info('Running GUI mode...')
     appctxt = ApplicationContext()       # 1. Instantiate ApplicationContext
     window = QMainWindow()
-    window.resize(250, 150)
+    n_rows, n_cols = 3, 3
+    board = Board2d(n_rows, n_cols)
+
+    def on_clicked(button, row, col):
+        print('Button at ({}, {}) clicked'.format(row, col))
+        button.setText('Clicked')
+
+    width = n_rows * 110
+    height = n_cols * 110
+    attribs = {
+        'width': 100,
+        'height': 100
+    }
+    widget = GUIBoard2dWidget(width, height)
+    window.setCentralWidget(widget)
+    displayer = GUIBoard2dDisplayer(on_clicked, attribs)
+    displayer.display(board, widget)
     window.show()
     exit_code = appctxt.app.exec_()      # 2. Invoke appctxt.app.exec_()
     sys.exit(exit_code)
