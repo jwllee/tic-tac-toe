@@ -4,6 +4,8 @@ LABEL maintainer "Wai Lam Jonathan Lee <jonathan.wailam.lee@gmail.com>"
 ENV TZ=Europe/Copenhagen
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
+ENV UNAME jwllee
+
 # Build prequisites
 RUN apt-get update && apt-get install -y \
 	python3 \
@@ -12,7 +14,11 @@ RUN apt-get update && apt-get install -y \
 	python3-venv \
 	libxcb-xinerama0-dev \
 	make \
-	build-essential 
+	build-essential \
+	pulseaudio \
+	pulseaudio-utils \
+	alsa-base \
+	alsa-utils
 
 # Other useful tools
 RUN apt-get update && apt-get install -y \
@@ -21,7 +27,7 @@ RUN apt-get update && apt-get install -y \
 	git \
 	vim
 
-ENV HOME=/home/jonny
+ENV HOME=/home/${UNAME}
 WORKDIR $HOME
 
 # setup dotfiles
@@ -34,6 +40,18 @@ RUN git clone --recursive https://github.com/jwllee/.vim.git .vim \
 	&& cd $HOME/.vim \
 	&& git submodule update --init
 
+RUN export UNAME=$UNAME UID=1000 GID=1000 && \
+	mkdir -p "/home/${UNAME}" && \
+	echo "${UNAME}:x:${UID}:${GID}:${UNAME} User,,,:/home/${UNAME}:/bin/bash" >> /etc/passwd && \
+	echo "${UNAME}:x:${UID}:" >> /etc/group && \
+	mkdir -p /etc/sudoers.d && \
+	echo "${UNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/${UNAME} && \
+	chmod 0440 /etc/sudoers.d/${UNAME} && \
+	chown ${UID}:${GID} -R /home/${UNAME} && \
+	gpasswd -a ${UNAME} audio
+
+COPY pulse-client.conf /etc/pulse/client.conf
+
 # standard locale
 RUN echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
 # set locales UTF-8
@@ -45,13 +63,6 @@ ENV LANG en_US.UTF-8
 RUN git config --global user.email "jonathan.wailam.lee@gmail.com" \
 	&& git config --global user.name "Wai Lam Jonathan Lee" \
 	&& git config --global commit.gpgsign false
-
-WORKDIR $HOME
-
-RUN useradd --home-dir $HOME jonny \
-	&& groupadd code \
-	&& gpasswd -a jonny code \
-	&& chown -R jonny:jonny $HOME
 
 RUN apt-get update && apt-get install -y \
 	libgl1-mesa-glx \
@@ -66,15 +77,17 @@ RUN apt-get update && apt-get install -y \
 	rubygems \
 	&& gem install --no-ri --no-rdoc fpm
 
-USER jonny
+USER $UNAME
 
 ENV VIRTUAL_ENV=$HOME/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin":$PATH
-ENV PYTHONPATH="/home/jonny/.local/lib/python3.6/site-packages/":$PYTHONPATH
+ENV PYTHONPATH="/home/${UNAME}/.local/lib/python3.6/site-packages/":$PYTHONPATH
 
 ADD ./setup_requirements.txt /tmp/setup_requirements.txt
 RUN pip install -r /tmp/setup_requirements.txt
 
 ADD ./requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
+
+CMD ["jwllee", "-vvvv", "/dev/urandom"]
