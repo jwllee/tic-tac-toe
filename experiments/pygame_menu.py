@@ -137,7 +137,6 @@ def make_main_menu(surface, submenu_list=[]):
                            enabled=False,
                            font=pygameMenu.fonts.FONT_NEVIS,
                            menu_alpha=90,
-                           menu_centered=True,
                            onclose=pygameMenu.events.PYGAME_MENU_CLOSE,
                            title='Main menu',
                            title_offsety=5,
