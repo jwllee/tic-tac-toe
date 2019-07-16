@@ -90,4 +90,9 @@ RUN pip install -r /tmp/setup_requirements.txt
 ADD ./requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
+# install pygame-menu
+RUN git clone https://github.com/ppizarror/pygame-menu.git /tmp/pygame-menu \
+	&& cd /tmp/pygame-menu \
+	&& python setup.py install --user 
+
 CMD ["jwllee", "-vvvv", "/dev/urandom"]
