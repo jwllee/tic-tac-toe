@@ -220,10 +220,10 @@ class Board2d(AbstractBoard):
         else:
             self.board[row, col] = int(marker)
             # update row, column, and diagonal count
-            self.row_count[marker, row] += 1
-            self.col_count[marker, col] += 1
-            self.logger.debug('row count: \n{}'.format(self.row_count))
-            self.logger.debug('col count: \n{}'.format(self.col_count))
+            self.update_row_count(marker, row, col)
+            self.update_col_count(marker, row, col)
+            self.update_l2r_diag_count(marker, row, col)
+            self.update_r2l_diag_count(marker, row, col)
             self.update_state(row, col)
             # update observers
             cell = Cell(int(marker), loc)
@@ -241,8 +241,10 @@ class Board2d(AbstractBoard):
             raise ValueError('Cell at {} is not marked.'.format(loc))
 
         self.board[row, col] = np.nan
-        self.row_count[marker, row] -= 1
-        self.col_count[marker, col] -= 1
+        self.update_row_count(None, row, col)
+        self.update_col_count(None, row, col)
+        self.update_l2r_diag_count(None, row, col)
+        self.update_r2l_diag_count(None, row, col)
         self._state = BoardState.ONGOING
         self.eval_state()
         # update observers
@@ -273,7 +275,10 @@ class Board2d(AbstractBoard):
         self.logger.debug(debug_msg)
 
         for level in range(start_level, end_level):
-            self.row_count[marker, row, level] += 1
+            if marker is None:
+                self.row_count[marker, row, level] -= 1
+            else:
+                self.row_count[marker, row, level] += 1
 
     def update_col_count(self, marker, row, col):
         start_level = max(0, row - self.n_connects + 1)
@@ -287,7 +292,10 @@ class Board2d(AbstractBoard):
         self.logger.debug(debug_msg)
 
         for level in range(start_level, end_level):
-            self.col_count[marker, col, level] += 1
+            if marker is None:
+                self.col_count[marker, col, level] -= 1
+            else:
+                self.col_count[marker, col, level] += 1
 
     def get_diag_ids(self, row, col, left2right=True):
         res = dict()
@@ -313,14 +321,20 @@ class Board2d(AbstractBoard):
         max_diag_id = self.l2r_diag_count.shape[1]
 
         for level, diag_id in self.get_diag_ids(row, col).items():
-            self.l2r_diag_count[marker, diag_id, level] += 1
+            if marker is None:
+                self.l2r_diag_count[marker, diag_id, level] -= 1
+            else:
+                self.l2r_diag_count[marker, diag_id, level] += 1
 
     def update_r2l_diag_count(self, marker, row, col):
         n_levels = self.r2l_diag_count.shape[2]
         max_diag_id = self.r2l_diag_count.shape[1]
 
         for level, diag_id in self.get_diag_ids(row, col, False).items():
-            self.r2l_diag_count[marker, diag_id, level] += 1
+            if marker is None:
+                self.r2l_diag_count[marker, diag_id, level] -= 1
+            else:
+                self.r2l_diag_count[marker, diag_id, level] += 1
 
     def row_has_winner(self, row):
         has_winner = False
