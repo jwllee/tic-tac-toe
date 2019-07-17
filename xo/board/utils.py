@@ -7,15 +7,15 @@ from xo import utils
 
 
 __all__ = [
+    'SEP',
     'Cell',
     'Marker',
     'BoardState',
-    'AbstractCellLocation',
-    'NotificationType',
-    'NotificationKey'
+    'AbstractCellLocation'
 ]
 
 
+SEP = ','
 Cell = namedtuple('Cell', ['val', 'loc'])
 
 
@@ -58,17 +58,6 @@ class AbstractCellLocation(ABC):
     @abstractclassmethod
     def parse(self, s):
         raise NotImplementedError('Please implement this method.')
-
-
-class NotificationType(IntEnum):
-    CELL = 1
-    STATE = 2
-
-
-class NotificationKey(IntEnum):
-    CELL = 1
-    STATE = 2
-    BOARD = 3
 
 
 def is_winner_state(state):

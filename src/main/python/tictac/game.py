@@ -104,7 +104,7 @@ class Game(ABC):
                 NotificationKey.MARKER: self.cur_marker,
                 NotificationKey.PLAYER: self.cur_player
             }
-            self.notify_observers(NotificationType.PLAYER_MOVE, data)
+            self.notify_observers(NotificationType.PROMPT_MOVE, data)
         else:
             loc = self.cur_player.get_move()
             self.do_move(str(loc))

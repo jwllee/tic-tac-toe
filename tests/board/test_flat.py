@@ -169,6 +169,11 @@ class TestBoard2d:
         assert board.col_count[marker, col, 0] == 0
         board.update_col_count(marker, row, col) 
         assert board.col_count[marker, col, 0] == 1
+        # update (0, 2)
+        row, col, marker = 0, 2, Marker.CROSS
+        assert board.col_count[marker, col, 0] == 0
+        board.update_col_count(marker, row, col)
+        assert board.col_count[marker, col, 0] == 1
 
     def test_4x3x3_update_col_count(self):
         n_rows, n_cols, n_connects = 4, 3, 3

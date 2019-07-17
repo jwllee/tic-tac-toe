@@ -1,8 +1,8 @@
 import numpy as np
 
-from xo import utils
 from xo.board.base import *
 from xo.board.utils import *
+from xo.utils import *
 from xo.board import utils as bd_utils
 
 
@@ -13,7 +13,7 @@ __all__ = [
 
 
 class CellLocation2d(AbstractCellLocation):
-    COORDINATE_FORMAT = 'r,c'
+    COORDINATE_FORMAT = 'r, c'
 
     def __init__(self, row, col):
         super().__init__(type(Board2d))
@@ -124,11 +124,13 @@ class Board2d(AbstractBoard):
     # Abstract methods
     #------------------------------------------------------------ 
     def copy(self, register_observers=False):
-        copied = Board2d(self.n_rows, self.n_cols)
+        copied = Board2d(self.n_rows, self.n_cols, self.n_connects)
         copied._state = self._state
         copied.board = self.board.copy()
         copied.row_count = self.row_count.copy()
         copied.col_count = self.col_count.copy()
+        copied.l2r_diag_count = self.l2r_diag_count.copy()
+        copied.r2l_diag_count = self.r2l_diag_count.copy()
 
         if register_observers:
             for obs in self.observers:
@@ -156,7 +158,7 @@ class Board2d(AbstractBoard):
         self._state = BoardState.ONGOING
 
     def is_cell_empty(self, loc):
-        utils.assert_isinstance('Cell location', CellLocation2d, loc)
+        assert_isinstance('Cell location', CellLocation2d, loc)
         row, col = loc.row, loc.col
 
         bound_err = '{} out of bounds [{}, {})'
@@ -171,7 +173,7 @@ class Board2d(AbstractBoard):
         return np.isnan(self.board[row, col])
 
     def get_cell(self, loc):
-        utils.assert_isinstance('cell location', self.CellLocation, loc)
+        assert_isinstance('cell location', CellLocation2d, loc)
         row, col = loc.row, loc.col
         cell_v = self.board[row, col]
         marker = None if cell_v == np.nan else Marker(cell_v + Marker.CIRCLE)
@@ -207,11 +209,11 @@ class Board2d(AbstractBoard):
 
     def mark_cell(self, marker, loc):
         self.logger.debug('Marking "{!r}" at {}'.format(marker, loc))
-        utils.assert_isinstance('marker', Marker, marker)
+        assert_isinstance('marker', Marker, marker)
         err_msg = 'Game state is not ongoing: {}'.format(self.state)
         assert self.state == BoardState.ONGOING, err_msg
 
-        utils.assert_isinstance('cell location', CellLocation2d, loc)
+        assert_isinstance('cell location', CellLocation2d, loc)
         row, col = loc.row, loc.col
         
         # check if it's already marked
@@ -227,13 +229,16 @@ class Board2d(AbstractBoard):
             self.update_state(row, col)
             # update observers
             cell = Cell(int(marker), loc)
-            data = { NotificationKey.CELL: cell }
+            data = { 
+                NotificationKey.CELL: cell,
+                NotificationKey.BOARD: self
+            }
             self.notify_observers(NotificationType.CELL, data)
             return True
 
     def unmark_cell(self, marker, loc):
-        utils.assert_isinstance('marker', Marker, marker)
-        utils.assert_isinstance('cell location', CellLocation2d, loc)
+        assert_isinstance('marker', Marker, marker)
+        assert_isinstance('cell location', CellLocation2d, loc)
 
         row, col = loc.row, loc.col
         # check if that cell is in fact marked
@@ -241,15 +246,18 @@ class Board2d(AbstractBoard):
             raise ValueError('Cell at {} is not marked.'.format(loc))
 
         self.board[row, col] = np.nan
-        self.update_row_count(None, row, col)
-        self.update_col_count(None, row, col)
-        self.update_l2r_diag_count(None, row, col)
-        self.update_r2l_diag_count(None, row, col)
+        self.update_row_count(marker, row, col, -1)
+        self.update_col_count(marker, row, col, -1)
+        self.update_l2r_diag_count(marker, row, col, -1)
+        self.update_r2l_diag_count(marker, row, col, -1)
         self._state = BoardState.ONGOING
         self.eval_state()
         # update observers
         cell = Cell(np.nan, loc)
-        data = { NotificationKey.CELL: cell }
+        data = { 
+            NotificationKey.CELL: cell,
+            NotificationKey.BOARD: self
+        }
         self.notify_observers(NotificationType.CELL, data)
 
     def is_winner(self, marker):
@@ -259,7 +267,7 @@ class Board2d(AbstractBoard):
     #------------------------------------------------------------ 
     # Board2d methods
     #------------------------------------------------------------ 
-    def update_row_count(self, marker, row, col):
+    def update_row_count(self, marker, row, col, add=1):
         # suppose that col is the last cell of the row to get the lowest
         # possible level no.
         start_level = max(0, col - self.n_connects + 1)
@@ -270,32 +278,28 @@ class Board2d(AbstractBoard):
         end_level = 1 if end_level <= 0 else end_level
 
         # debugging
-        debug_msg = 'Row update ({}, {}) between [{}, {})'
-        debug_msg = debug_msg.format(row, col, start_level, end_level)
-        self.logger.debug(debug_msg)
+        debug_msg = 'Row update ({}, {}) with "{!r}" and {} between [{}, {})'
+        debug_msg = debug_msg.format(row, col, marker, add, 
+                                     start_level, end_level)
+        # self.logger.debug(debug_msg)
 
         for level in range(start_level, end_level):
-            if marker is None:
-                self.row_count[marker, row, level] -= 1
-            else:
-                self.row_count[marker, row, level] += 1
+            self.row_count[marker, row, level] += add
 
-    def update_col_count(self, marker, row, col):
+    def update_col_count(self, marker, row, col, add=1):
         start_level = max(0, row - self.n_connects + 1)
         n_levels = self.col_count.shape[2]
         end_level = min(row + 1, n_levels)
         end_level = 1 if end_level <= 0 else end_level
 
         # debugging
-        debug_msg = 'Row update ({}, {}) between [{}, {})'
-        debug_msg = debug_msg.format(row, col, start_level, end_level)
-        self.logger.debug(debug_msg)
+        debug_msg = 'Col update ({}, {}) with "{!r}" and {} between [{}, {})'
+        debug_msg = debug_msg.format(row, col, marker, add,
+                                     start_level, end_level)
+        # self.logger.debug(debug_msg)
 
         for level in range(start_level, end_level):
-            if marker is None:
-                self.col_count[marker, col, level] -= 1
-            else:
-                self.col_count[marker, col, level] += 1
+            self.col_count[marker, col, level] += add
 
     def get_diag_ids(self, row, col, left2right=True):
         res = dict()
@@ -316,34 +320,32 @@ class Board2d(AbstractBoard):
 
         return res
 
-    def update_l2r_diag_count(self, marker, row, col):
+    def update_l2r_diag_count(self, marker, row, col, add=1):
         n_levels = self.l2r_diag_count.shape[2]
         max_diag_id = self.l2r_diag_count.shape[1]
 
         for level, diag_id in self.get_diag_ids(row, col).items():
-            if marker is None:
-                self.l2r_diag_count[marker, diag_id, level] -= 1
-            else:
-                self.l2r_diag_count[marker, diag_id, level] += 1
+            self.l2r_diag_count[marker, diag_id, level] += add
 
-    def update_r2l_diag_count(self, marker, row, col):
+    def update_r2l_diag_count(self, marker, row, col, add=1):
         n_levels = self.r2l_diag_count.shape[2]
         max_diag_id = self.r2l_diag_count.shape[1]
 
         for level, diag_id in self.get_diag_ids(row, col, False).items():
-            if marker is None:
-                self.r2l_diag_count[marker, diag_id, level] -= 1
-            else:
-                self.r2l_diag_count[marker, diag_id, level] += 1
+            self.r2l_diag_count[marker, diag_id, level] += add
 
     def row_has_winner(self, row):
         has_winner = False
         n_levels = self.row_count.shape[2]
         for l in range(0, n_levels):
             winner = np.where(self.row_count[:, row, l] == self.n_connects)[0]
+
+            debug_msg = 'row_count[:, {}, {}]: {}'
+            debug_msg = debug_msg.format(row, l, self.row_count[:, row, l])
+            # self.logger.debug(debug_msg)
             debug_msg = 'Winner at row {} level {}: {}'
             debug_msg = debug_msg.format(row, l, winner)
-            self.logger.debug(debug_msg)
+            # self.logger.debug(debug_msg)
 
             if winner.shape[0] > 0:
                 marker = Marker(winner[0])
@@ -363,9 +365,12 @@ class Board2d(AbstractBoard):
         for l in range(0, n_levels):
             winner = np.where(self.col_count[:, col, l] == self.n_connects)[0]
 
+            debug_msg = 'col_count[:, {}, {}]: {}'
+            debug_msg = debug_msg.format(col, l, self.col_count[:, col, l])
+            # self.logger.debug(debug_msg)
             debug_msg = 'Winner at col {} level {}: {}'
             debug_msg = debug_msg.format(col, l, winner)
-            self.logger.debug(debug_msg)
+            # self.logger.debug(debug_msg)
 
             if winner.shape[0] > 0:
                 marker = Marker(winner[0])
@@ -380,12 +385,18 @@ class Board2d(AbstractBoard):
         return has_winner
 
     def diag_has_winner(self, diag_id, level, left2right=True):
+        has_winner = False
+        diag_count = self.l2r_diag_count if left2right else self.r2l_diag_count
         cond = diag_count[:, diag_id, level] == self.n_connects
         winner = np.where(cond)[0]
 
+        debug_msg = '[l2r: {}] diag_count[:, {}, {}]: {}'
+        debug_msg = debug_msg.format(left2right, diag_id, level, 
+                                     diag_count[:, diag_id, level])
+        # self.logger.debug(debug_msg)
         debug_msg = 'Winner at diag {} level {}: {}'
         debug_msg = debug_msg.format(diag_id, level, winner)
-        self.logger.debug(debug_msg)
+        # self.logger.debug(debug_msg)
 
         if winner.shape[0] > 0:
             marker = Marker(winner[0])
@@ -447,13 +458,23 @@ class Board2d(AbstractBoard):
 
         # 3. check diagonals
         # left to right diagonal
-        for level, diag_id in self.get_diag_ids(row, col).items():
+        l2r_diag_ids = self.get_diag_ids(row, col, left2right=True)
+        debug_msg = '({}, {}): no. l2r diag ids: {}'
+        debug_msg = debug_msg.format(row, col, len(l2r_diag_ids))
+        # self.logger.debug(debug_msg)
+        
+        for level, diag_id in l2r_diag_ids.items():
             if self.diag_has_winner(diag_id, level, left2right=True):
                 data = { NotificationKey.STATE: self.state }
                 self.notify_observers(NotificationType.STATE, data)
                 return
 
         # right to left diagonal
+        r2l_diag_ids = self.get_diag_ids(row, col, left2right=False)
+        debug_msg = '({}, {}): no. r2l diag ids: {}'
+        debug_msg = debug_msg.format(row, col, len(r2l_diag_ids))
+        # self.logger.debug(debug_msg)
+
         for level, diag_id in self.get_diag_ids(row, col, False).items():
             if self.diag_has_winner(diag_id, level, left2right=False):
                 data = { NotificationKey.STATE: self.state }
