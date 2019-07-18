@@ -47,7 +47,7 @@ logging.config.dictConfig({
     'loggers': {
         '': {
             'handlers': ['standard'],
-            'level': 'DEBUG',
+            'level': 'INFO',
             'propagate': True
         }
     }
