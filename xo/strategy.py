@@ -145,8 +145,8 @@ class MinimaxStrategy(Strategy):
             # self.logger.info('List length: {}'.format(len(node_stack)))
             parent = node_stack[-2]
             minimax_p = parent[3]
-            lower_larger_than_par_upper = is_max and minimax[1] < minimax_p[0]
-            upper_less_than_par_lower = not is_max and minimax[0] > minimax_p[1]
+            lower_larger_than_par_upper = is_max and minimax[0] > minimax_p[1]
+            upper_less_than_par_lower = not is_max and minimax[1] < minimax_p[0]
 
             if lower_larger_than_par_upper or upper_less_than_par_lower:
                 # self.logger.info('Pruned {!r} for player "{!r}"'.format(last_loc, last_marker))
