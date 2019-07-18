@@ -87,7 +87,6 @@ class MinimaxStrategy(Strategy):
         for cell in empty_cells:
             board.mark_cell(marker, cell.loc) 
             # self.logger.info('Marked {!r} for player "{!r}"'.format(cell.loc, marker))
-            # minimax_v = self.minimax_r(board, 1, next_marker, marker)
             minimax_v = self.minimax(board, next_marker, marker)
             if minimax_v > best_score:
                 best_score = minimax_v
@@ -100,45 +99,6 @@ class MinimaxStrategy(Strategy):
         # self.logger.info('Transposition table size: {:.0f}b'.format(table_size))
 
         return best_move_loc
-
-    def minimax_r(self, board, depth, cur_marker, marker):
-        self.n_explored_states += 1
-        # if self.n_explored_states % 5000 == 0:
-        #     self.logger.info('Explored {} states'.format(self.n_explored_states))
-
-        score = self.utility(board, marker)
-
-        max_score = self.get_max_score(board)
-        if score == max_score:
-            return score
-        
-        if score == -max_score:
-            return score
-
-        if board.full:
-            return 0
-
-        is_max = cur_marker == marker
-        empty_cells = board.get_empty_cells()
-        next_marker = Marker.next_marker(cur_marker)
-        best_score = -np.inf if is_max else np.inf
-
-        for cell in empty_cells:
-            board.mark_cell(cur_marker, cell.loc)
-            minimax_v = self.minimax_r(board, depth + 1, next_marker, marker)
-            aux = best_score
-            if is_max:
-                best_score = max(best_score, minimax_v)
-            else:
-                best_score = min(best_score, minimax_v)
-
-            if aux != best_score:
-                # update best move loc
-                self.best_move_loc = cell.loc
-
-            board.unmark_cell(cur_marker, cell.loc)
-
-        return best_score
 
     def pruneable(self, node_stack, minimax, is_max):
         if len(node_stack) > 1 and self.prune:
@@ -179,8 +139,6 @@ class MinimaxStrategy(Strategy):
 
         while node_stack:
             depth, last_loc, children, minimax, last_marker, cur_marker = node_stack[-1]
-            debug_msg = 'Evaluating {}'.format(last_loc)
-            # self.logger.debug(debug_msg)
 
             try:
                 loc = children.pop(0).loc
