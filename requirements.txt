@@ -6,3 +6,5 @@ matplotlib
 numpy
 petname>=2.2
 pygame
+numba
+icc_rt
