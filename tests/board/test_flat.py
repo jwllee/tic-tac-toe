@@ -362,3 +362,36 @@ class TestBoard2d:
         assert board.r2l_diag_count[marker, 0, 0] == 0
         assert board.r2l_diag_count[marker, 1, 0] == 0
         assert board.r2l_diag_count[marker, 1, 1] == 1
+
+    def test_3x3x3_eval_state(self):
+        n_rows, n_cols, n_connects = 3, 3, 3
+        board = Board2d(n_rows, n_cols, n_connects)
+
+        assert board.state == BoardState.ONGOING
+
+        # moves
+        move0 = (0, 0, Marker.CIRCLE)
+        move1 = (0, 1, Marker.CIRCLE)
+        move2 = (1, 1, Marker.CIRCLE)
+
+        board.update_row_count(move0[2], move0[0], move0[1])
+        board.update_col_count(move0[2], move0[0], move0[1])
+        board.update_l2r_diag_count(move0[2], move0[0], move0[1])
+        board.update_r2l_diag_count(move0[2], move0[0], move0[1])
+
+        board.update_row_count(move1[2], move1[0], move1[1])
+        board.update_col_count(move1[2], move1[0], move1[1])
+        board.update_l2r_diag_count(move1[2], move1[0], move1[1])
+        board.update_r2l_diag_count(move1[2], move1[0], move1[1])
+
+        board.update_row_count(move2[2], move2[0], move2[1])
+        board.update_col_count(move2[2], move2[0], move2[1])
+        board.update_l2r_diag_count(move2[2], move2[0], move2[1])
+        board.update_r2l_diag_count(move2[2], move2[0], move2[1])
+
+        board.eval_state()
+        assert board.row_count[Marker.CIRCLE, 0, 0] == 2
+        assert board.row_count[Marker.CIRCLE, 1, 0] == 1
+        assert board.col_count[Marker.CIRCLE, 0, 0] == 1
+        assert board.col_count[Marker.CIRCLE, 1, 0] == 2
+        assert board.state == BoardState.ONGOING
