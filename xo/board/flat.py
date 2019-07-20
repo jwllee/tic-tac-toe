@@ -1,5 +1,5 @@
 import numpy as np
-import sys
+import sys, time
 
 from xo.board.base import *
 from xo.board.utils import *
@@ -287,8 +287,9 @@ class Board2d(AbstractBoard):
                                      start_level, end_level)
         # self.logger.debug(debug_msg)
 
-        for level in range(start_level, end_level):
-            self.row_count[marker, row, level] += add
+        self.row_count[marker, row, start_level:end_level] += add
+        # for level in range(start_level, end_level):
+        #     self.row_count[marker, row, level] += add
 
     def update_col_count(self, marker, row, col, add=1):
         start_level = max(0, row - self.n_connects + 1)
@@ -302,8 +303,9 @@ class Board2d(AbstractBoard):
                                      start_level, end_level)
         # self.logger.debug(debug_msg)
 
-        for level in range(start_level, end_level):
-            self.col_count[marker, col, level] += add
+        self.col_count[marker, col, start_level:end_level] += add
+        # for level in range(start_level, end_level):
+        #     self.col_count[marker, col, level] += add
 
     def get_diag_ids(self, row, col, left2right=True):
         res = dict()
@@ -328,15 +330,25 @@ class Board2d(AbstractBoard):
         n_levels = self.l2r_diag_count.shape[2]
         max_diag_id = self.l2r_diag_count.shape[1]
 
-        for level, diag_id in self.get_diag_ids(row, col).items():
-            self.l2r_diag_count[marker, diag_id, level] += add
+        diag_ids_dict = self.get_diag_ids(row, col)
+        levels = list(diag_ids_dict.keys())
+        diag_ids = list(diag_ids_dict.values())
+        self.l2r_diag_count[marker, diag_ids, levels] += add
+
+        # for level, diag_id in self.get_diag_ids(row, col).items():
+        #     self.l2r_diag_count[marker, diag_id, level] += add
 
     def update_r2l_diag_count(self, marker, row, col, add=1):
         n_levels = self.r2l_diag_count.shape[2]
         max_diag_id = self.r2l_diag_count.shape[1]
 
-        for level, diag_id in self.get_diag_ids(row, col, False).items():
-            self.r2l_diag_count[marker, diag_id, level] += add
+        diag_ids_dict = self.get_diag_ids(row, col, False)
+        levels = list(diag_ids_dict.keys())
+        diag_ids = list(diag_ids_dict.values())
+        self.r2l_diag_count[marker, diag_ids, levels] += add
+
+        # for level, diag_id in self.get_diag_ids(row, col, False).items():
+        #     self.r2l_diag_count[marker, diag_id, level] += add
 
     def row_has_winner(self, row):
         has_winner = False
@@ -414,6 +426,7 @@ class Board2d(AbstractBoard):
         return has_winner
 
     def eval_state(self):
+        # start = time.time()
         # check rows
         for row in range(self.n_rows):
             if self.row_has_winner(row):
@@ -446,6 +459,9 @@ class Board2d(AbstractBoard):
             self._state = BoardState.DRAW
             data = { NotificationKey.STATE: self.state }
             self.notify_observers(NotificationType.STATE, data)
+        # end = time.time()
+        # took = (end - start) * 1000
+        # print('Eval state took: {:.3f}ms'.format(took))
 
     def update_state(self, row, col):
         # 1. check row 
