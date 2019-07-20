@@ -1,5 +1,5 @@
 from enum import IntEnum
-import sys, argparse
+import sys, argparse, os
 
 
 from xo.board.utils import *
@@ -45,16 +45,23 @@ class TUIMainWindow(MainWindow):
     def __init__(self):
         self.view = TextView(TextBoard2dDisplayer())
         self.game = None
+        self.cache_dir = os.path.join('.', 'cache')
+        if not os.path.isdir(self.cache_dir):
+            os.mkdir(self.cache_dir)
+
+        self.strategy_f = StrategyFactory(self.cache_dir)
 
     def new_game(self):
         option = self.view.get_choice_input(NewGameOption, 'New game')
-
+        
         if option == NewGameOption.BASIC:
+            n_rows, n_cols, n_connects = 3, 3, 3
+            minimax = self.strategy_f.new_minimax_strategy(n_rows, n_cols, n_connects,
+                                                           prune=True, cache=True)
             players = [
                 PlayerReal(),
-                PlayerAI(MinimaxStrategy(prune=True, cache=True))
+                PlayerAI(minimax)
             ]
-            n_rows, n_cols, n_connects = 3, 3, 3
             board = Board2d(n_rows, n_cols, n_connects)
             self.game = Game(board, players)
             self.game.register_observer(self)

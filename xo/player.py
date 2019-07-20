@@ -37,6 +37,9 @@ class Player(ABC):
     def is_real(self):
         raise NotImplementedError('Cannot set if player is real!')
 
+    def save_data(self):
+        pass
+
 
 class PlayerReal(Player):
     def __init__(self, name=None):
@@ -56,3 +59,6 @@ class PlayerAI(Player):
         assert self.strategy is not None, 'AI player does not have a strategy!'
         assert self.board is not None, 'Player does not have access to board!'
         return self.strategy.get_move(self.board, self.marker)
+
+    def save_data(self):
+        self.strategy.save_data()

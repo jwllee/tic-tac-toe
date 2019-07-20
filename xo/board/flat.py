@@ -1,4 +1,5 @@
 import numpy as np
+import sys
 
 from xo.board.base import *
 from xo.board.utils import *
@@ -138,9 +139,6 @@ class Board2d(AbstractBoard):
 
         return copied
 
-    def __hash__(self):
-        return hash(self.board.data.tobytes())
-
     def restart(self):
         self.board = np.full((self.n_rows, self.n_cols), np.nan)
         self.row_count = self.make_row_count(self.n_rows, 
@@ -209,8 +207,14 @@ class Board2d(AbstractBoard):
 
     def mark_cell(self, marker, loc):
         self.logger.debug('Marking "{!r}" at {}'.format(marker, loc))
+        self.logger.debug('Board: \n{}'.format(self.board))
+        self.logger.debug('row_count: \n{}'.format(self.row_count))
+        self.logger.debug('col_count: \n{}'.format(self.col_count))
+        self.logger.debug('l2r_diag_count: \n{}'.format(self.l2r_diag_count))
+        self.logger.debug('r2l_diag_count: \n{}'.format(self.r2l_diag_count))
         assert_isinstance('marker', Marker, marker)
-        err_msg = 'Game state is not ongoing: {}'.format(self.state)
+        err_msg = 'Game state ({!s}) is not ongoing. \nBoard: \n{}'
+        err_msg = err_msg.format(self.state, self.board)
         assert self.state == BoardState.ONGOING, err_msg
 
         assert_isinstance('cell location', CellLocation2d, loc)

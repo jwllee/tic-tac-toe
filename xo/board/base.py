@@ -51,10 +51,6 @@ class AbstractBoard(ABC):
         raise NotImplementedError('Please implement this method.')
 
     @abstractmethod
-    def __hash__(self):
-        raise NotImplementedError('Please implement this method.')
-
-    @abstractmethod
     def restart(self):
         raise NotImplementedError('Please implement this method.')
 

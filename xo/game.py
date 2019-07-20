@@ -1,6 +1,7 @@
 from xo.utils import *
 from xo.board.utils import *
 from xo.board.flat import *
+from xo.strategy import *
 
 
 class Game:
@@ -90,6 +91,10 @@ class Game:
         return msg
 
     def end(self):
+        # @todo: improve this part
+        for p in self.players:
+            p.save_data()
+
         # display end game message
         data = {
             NotificationKey.MESSAGE: self.get_result_msg(),
