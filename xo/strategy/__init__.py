@@ -29,6 +29,7 @@ class StrategyFactory:
             self.logger.info('Loading transposition table')
             with open(table_fp, 'rb') as f:
                 table = pickle.load(f)
+                self.logger.info('No. entries in tt: {}'.format(len(table)))
 
         self.logger.debug('Table: {}'.format(table))
         strategy = MinimaxStrategy(table_fp, prune=prune,

@@ -23,10 +23,22 @@ class StateCacheKey:
         self.board_v = board_v
         self.is_max = is_max
 
+    def __repr__(self):
+        repr_ = 'StateCacheKey(board_filled = {}, is_max = {})'
+        sum_ = np.sum(np.isfinite(self.board_v))
+        repr_ = repr_.format(sum_, self.is_max)
+        return repr_
+
+    def __str__(self):
+        str_ = 'StateCacheKey:\n'
+        str_ = str_ + '{}\n'
+        str_ = str_ + 'is_max: {}\n'
+        str_ = str_.format(self.board_v, self.is_max)
+        return str_
+
     def __hash__(self):
         # assume 32-bit builds, 1 bit is used for sign since hash is an integer
-        ravel = self.board_v.ravel()
-        hash_ = addition_hash(ravel, ravel.shape[0])
+        hash_ = addition_hash(self.board_v)
         hash_ = (hash_ * 19) + self.is_max
         return int(hash_)
 
@@ -46,6 +58,7 @@ class MinimaxStrategy(Strategy):
         self.cache_fp = cache_fp
         self.best_move_loc = None
         self.n_explored_states = 0
+        self.n_collisions = 0
         self.n_pruned = 0
         self.prune = prune
         self.cache = cache
@@ -53,19 +66,23 @@ class MinimaxStrategy(Strategy):
 
     def save_data(self):
         self.logger.info('Saving transposition table')
+        self.logger.info('No. of entries in tt: {}'.format(len(self.transposition_table)))
         with open(self.cache_fp, 'wb') as f:
-            pickle.dump(self.transposition_table, f,
-                        protocol=pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.transposition_table, f)
     
     def get_move(self, board, marker):
-        copy = board.copy(register_observers=False)
+        self.n_collisions = 0
         self.n_explored_states = 0
+        copy = board.copy(register_observers=False)
         self.n_pruned = 0
         start = time.time()
         move = self.get_best_move(copy, marker)
         end = time.time()
         took = end - start
-        print('Move took: {:.3f}s'.format(took))
+        self.logger.info('Move took: {:.3f}s'.format(took))
+        self.logger.info('No. of explored states: {}'.format(self.n_explored_states))
+        self.logger.info('No. of collisions: {}'.format(self.n_collisions))
+        self.logger.info('No. of entries in tt: {}'.format(len(self.transposition_table)))
         return move
 
     def get_max_score(self, board):
@@ -149,13 +166,13 @@ class MinimaxStrategy(Strategy):
 
             try:
                 loc = children.pop(0).loc
+                self.n_explored_states += 1
                 # has children, decide whether if we can prune this state
                 is_max = last_marker == marker
                 if self.pruneable(node_stack, minimax, is_max):
                     continue
 
                 board.mark_cell(cur_marker, loc)
-                self.n_explored_states += 1
                 self.logger.debug('After marking board: \n{}'.format(board.board))
 
                 # check whether if we have already seen this state
@@ -176,10 +193,11 @@ class MinimaxStrategy(Strategy):
                         self.logger.debug('Cache {}: \n{}'.format(shape1, board_value_cache))
                         diff = board.board == board_value_cache
                         self.logger.debug('Locations that are equal: \n{}'.format(diff))
+                        self.n_collisions += 1 
 
                 if has_key and equal_board:
                     value = self.transposition_table[key]
-                    utility = value[1] 
+                    utility = value[2] 
                     minimax_1 = [utility, utility]
                     empty_cells = []
                 else:
@@ -207,8 +225,9 @@ class MinimaxStrategy(Strategy):
                     # store the non-terminal state in transposition table
                     if self.cache and last_marker is not None:
                         is_max = last_marker == marker
-                        key = StateCacheKey(board.board, is_max)
-                        self.transposition_table[key] = (board.board, utility)
+                        board_cache = board.board.copy()
+                        key = StateCacheKey(board_cache, is_max)
+                        self.transposition_table[key] = (board_cache, depth, utility)
 
                 node_stack.pop(-1)
 
