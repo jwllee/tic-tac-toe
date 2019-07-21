@@ -15,11 +15,11 @@ class StrategyType(Enum):
 
 
 @njit
-def addition_hash(arr, sz):
+def addition_hash(arr):
     # taken from: https://stackoverflow.com/questions/19854564/hash-integer-array
     hash_ = 17
-    for i in range(sz):
-        v = arr[i] 
+    for a in np.nditer(arr):
+        v = a.item()
         if np.isinf(v) or np.isnan(v):
             v = -1
         hash_ = (hash_ * 19) + v 
