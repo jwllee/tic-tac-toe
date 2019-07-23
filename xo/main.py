@@ -55,7 +55,7 @@ class TUIMainWindow(MainWindow):
         option = self.view.get_choice_input(NewGameOption, 'New game')
         
         if option == NewGameOption.BASIC:
-            n_rows, n_cols, n_connects = 3, 3, 3
+            n_rows, n_cols, n_connects = 4, 4, 4
             minimax = self.strategy_f.new_minimax_strategy(n_rows, n_cols, n_connects,
                                                            prune=True, cache=True)
             players = [

@@ -10,10 +10,7 @@ BLACK = (0, 0, 0)
 
 def draw_grid(screen, n_rows=3, n_cols=3, color=BLACK, thickness=2):
     width, height = pygame.display.get_surface().get_size()
-    padding = 5
-
-    width -= 2 * padding
-    height -= 2 * padding
+    padding = 20
 
     # vertical lines
     vlines = np.linspace(padding, width - padding, num=n_rows + 1)
@@ -26,7 +23,7 @@ def draw_grid(screen, n_rows=3, n_cols=3, color=BLACK, thickness=2):
 
     hlines = np.linspace(padding, height - padding, num=n_cols + 1)
     for i in range(1, n_cols):
-        y = hlines[i]
+        y = hlines[i] 
         pygame.draw.line(screen, color,
                          (padding, y),
                          (width - padding, y),
@@ -71,7 +68,7 @@ def main():
     screen.fill(WHITE)
     draw_circle(screen)
     draw_cross(screen)
-    draw_grid(screen, n_rows=4, n_cols=5)
+    draw_grid(screen, n_rows=3, n_cols=5)
 
     # update the full display Surface to the screen
     pygame.display.flip()

@@ -17,6 +17,6 @@ setup(
     author='Wai Lam Jonathan Lee',
     author_email='jonathan.wailam.lee@gmail.com',
     install_requires=requirements,
-    packages=find_packages('xo')
+    packages=find_packages()
 )
 
