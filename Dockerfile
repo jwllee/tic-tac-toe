@@ -77,12 +77,18 @@ RUN apt-get update && apt-get install -y \
 	rubygems \
 	&& gem install --no-ri --no-rdoc fpm
 
-USER $UNAME
 
 ENV VIRTUAL_ENV=$HOME/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin":$PATH
 ENV PYTHONPATH="/home/${UNAME}/.local/lib/python3.6/site-packages/":$PYTHONPATH
+
+# required packages for psycopg
+RUN apt-get update && apt-get install -y \
+	gcc \
+	musl-dev \
+	postgresql \
+	libpq-dev
 
 ADD ./setup_requirements.txt /tmp/setup_requirements.txt
 RUN pip install -r /tmp/setup_requirements.txt
@@ -90,9 +96,6 @@ RUN pip install -r /tmp/setup_requirements.txt
 ADD ./requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
-# install pygame-menu
-RUN git clone https://github.com/ppizarror/pygame-menu.git /tmp/pygame-menu \
-	&& cd /tmp/pygame-menu \
-	&& python setup.py install --user 
+USER $UNAME
 
 CMD ["jwllee", "-vvvv", "/dev/urandom"]

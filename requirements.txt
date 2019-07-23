@@ -1,11 +1,10 @@
-PyQt5==5.9.2
-fbs>=0.8.2
 pytest>=4.5.0
 pandas>=0.24.0
 matplotlib
 numpy
 petname>=2.2
-pygame
 numba
 icc_rt
 colorama
+Django>=2.0,<3.0
+psycopg2>=2.7,<3.0
