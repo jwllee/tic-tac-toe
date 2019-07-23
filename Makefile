@@ -26,4 +26,5 @@ run-container: build-docker
 		-v /tmp/.X11-unix:/tmp/.X11-unix \
 		-v /run/user/${USER_UID}/pulse:/run/user/1000/pulse \
 		-v $(DIR):/home/jwllee/code \
+		--network="host" \
 		tic-tac-toe /bin/bash
