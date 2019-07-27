@@ -35,37 +35,37 @@ class GameModelTests(TestCase):
 
     def test_3x3_add_cross(self):
         game = Game(n_rows=3, n_cols=3)
-        game.add_cross(0, 0)
+        game.add_cross(0)
         self.assertEqual(game.board_x, 0b000000001)
 
-        game.add_cross(2, 2)
+        game.add_cross(8)
         self.assertEqual(game.board_x, 0b100000001)
 
-        game.add_cross(1, 1)
+        game.add_cross(4)
         self.assertEqual(game.board_x, 0b100010001)
 
     def test_3x3_add_circle(self):
         game = Game(n_rows=3, n_cols=3)
-        game.add_circle(0, 0)
+        game.add_circle(0)
         self.assertEqual(game.board_o, 0b000000001)
 
-        game.add_circle(2, 2)
+        game.add_circle(8)
         self.assertEqual(game.board_o, 0b100000001)
 
-        game.add_circle(1, 1)
+        game.add_circle(4)
         self.assertEqual(game.board_o, 0b100010001)
 
     def test_3x3_is_empty(self):
         game = Game(n_rows=3, n_cols=3)
-        game.add_cross(2, 2)
-        self.assertIs(game.is_empty(2, 2), False)
-        self.assertIs(game.is_empty(1, 1), True)
+        game.add_cross(8)
+        self.assertIs(game.is_empty(8), False)
+        self.assertIs(game.is_empty(4), True)
 
     def test_3x3_board_str(self):
         game = Game(n_rows=3, n_cols=3)
-        game.add_cross(0, 0)
-        game.add_cross(2, 2)
-        game.add_circle(1, 1)
+        game.add_cross(0)
+        game.add_cross(8)
+        game.add_circle(4)
         board_str = game.board_str
         expected = 'X   O   X'
         self.assertEqual(board_str, expected)
