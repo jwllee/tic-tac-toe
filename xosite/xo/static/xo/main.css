@@ -1,0 +1,25 @@
+body{
+    margin: 20px;
+    background: #212121;
+    color: #666;
+}
+h1{
+    text-align: center;
+    color: #fff;
+}
+#box-3x3{
+    width: 350px;
+    overflow: auto;
+    margin: 40px auto;
+    background: #666;
+    padding-bottom: 40px;
+    border-radius: 10px;
+}
+#message{
+    text-align: center;
+    background: #333;
+    color: #fff;
+}
+.board{
+    margin: 40px;
+}

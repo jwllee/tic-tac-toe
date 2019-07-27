@@ -90,4 +90,6 @@ class Game(models.Model):
         print('Playing auto')
 
     def play(self, index):
-        print('Playing')
+        info_msg = 'Playing index {} at game {}'
+        info_msg = info_msg.format(index, self.pk)
+        print(info_msg)

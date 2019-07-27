@@ -1,34 +1,28 @@
 {% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'xo/style.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'xo/main.css' %}">
 
 <body>
-    <div class="text-center"id="box-3x3">
+    <div class="text-center" id="box-3x3">
         <header>
             <h1>3 x 3 board</h1>
         </header>
         <div id="message">This is a test message.</div>
-        <div class="board board-3x3">
-            <div class="row row-3x3">
+        <div class="board">
+            <div>
                 {% include "includes/square.html" with game=game index=0 value=game.board_str.0 %}
                 {% include "includes/square.html" with game=game index=1 value=game.board_str.1 %}
                 {% include "includes/square.html" with game=game index=2 value=game.board_str.2 %}
             </div>
-            <div class="row row-3x3">
+            <div>
                 {% include "includes/square.html" with game=game index=3 value=game.board_str.3 %}
                 {% include "includes/square.html" with game=game index=4 value=game.board_str.4 %}
                 {% include "includes/square.html" with game=game index=5 value=game.board_str.5 %}
             </div>
-            <div class="row row-3x3">
+            <div>
                 {% include "includes/square.html" with game=game index=6 value=game.board_str.6 %}
                 {% include "includes/square.html" with game=game index=7 value=game.board_str.7 %}
                 {% include "includes/square.html" with game=game index=8 value=game.board_str.8 %}
             </div>
         </div>
-        <div class="clearfix"></div>
-        <footer>
-            <button id="reset">Reset</button>
-            <button id="newgame">New game</button>
-            <button id="settings">Settings</button>
-        </footer>
     </div>
 </body>

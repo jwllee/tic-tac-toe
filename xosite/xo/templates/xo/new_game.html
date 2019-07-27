@@ -1,13 +1,12 @@
 {% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'xo/style.css' %}">
-
+<link rel="stylesheet" type="text/css" href="{% static 'xo/main.css' %}">
 <body>
     <div class="text-center" id="box-3x3">
     <header>
         <h1>Tic-Tac-Toe</h1>
     </header>
     <div id="message">Would you like to play a game?</div>
-    <form method="POST" class="board">
+    <form method="POST">
         {% csrf_token %}
         <div>
             <label>Number of rows</label>
@@ -33,7 +32,7 @@
             <label>Player 2 type</label>
             {{ form.player2 }}
         </div>
-        <button id="newgame" type="submit">Play</button>
+        <button type="submit">Play</button>
     </form>
     </div>
 </body>
