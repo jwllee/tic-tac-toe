@@ -1,35 +1,35 @@
 {% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'xo/main.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'xo/new_game.css' %}">
 <body>
-    <div class="text-center" id="box-3x3">
+    <div class="text-center" id="box">
     <header>
         <h1>Tic-Tac-Toe</h1>
     </header>
     <div id="message">Would you like to play a game?</div>
-    <form method="POST">
+    <form method="POST" id="form">
         {% csrf_token %}
         <div>
-            <label>Number of rows</label>
+            <label class="label">Number of rows</label>
             {{ form.n_rows }}
         </div>
         <div>
-            <label>Number of columns</label>
+            <label class="label">Number of columns</label>
             {{ form.n_cols }}
         </div>
         <div>
-            <label>Number of connects</label>
+            <label class="label">Number of connects</label>
             {{ form.n_connects }}
         </div>
         <div>
-            <label>Is Kriegspiel</label>
+            <label class="label">Is Kriegspiel</label>
             {{ form.is_kriegspiel }}
         </div>
         <div>
-            <label>Player 1 type</label>
+            <label class="label">Player 1 type</label>
             {{ form.player1 }}
         </div>
         <div>
-            <label>Player 2 type</label>
+            <label class="label">Player 2 type</label>
             {{ form.player2 }}
         </div>
         <button type="submit">Play</button>
