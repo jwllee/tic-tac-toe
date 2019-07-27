@@ -9,14 +9,6 @@ h1{
 .clearfix{
     clear: both;
 }
-#box-3x3{
-    width: 350px;
-    overflow: auto;
-    margin: 40px auto;
-    background: #666;
-    padding-bottom: 40px;
-    border-radius: 10px;
-}
 #box-4x4{
     width: 430px;
     overflow: auto;
@@ -30,6 +22,31 @@ h1{
     color: #fff;
     text-align: center;
 }
+.row {
+    height: 70px;
+}
+.board .row:after {
+    clear: both;
+    content: " ";
+    display: table;
+}
+.cell {
+    float: left;
+    width: 70px;
+    height: 70px;
+    margin: 10px;
+    font-size: 50px;
+    background: #333;
+    color: #ccc;
+    text-align: center;
+    border-radius: 5px;
+    vertical-align: middle;
+    line-height: 70px;
+}
+.cell button[type=submit]:hover {
+    cursor: pointer;
+    background: #000;
+}
 #board li{
     float: left;
     margin: 10px;
@@ -42,11 +59,11 @@ h1{
     text-align: center;
     border-radius: 5px;
 }
-#board li:hover, #reset:hover, #settings:hover{
+#board li:hover, #reset:hover, #settings:hover, #newgame:hover{
     cursor: pointer;
     background: #000;
 }
-#reset, #settings{
+#reset, #settings, #newgame{
     border: 0;
     background: #444;
     color: #fff;
