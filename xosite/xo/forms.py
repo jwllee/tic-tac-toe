@@ -3,7 +3,7 @@ import random
 from django import forms
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 
-from .models import Game
+from .models import Game, BoardState
 from .players import get_player
 
 
@@ -20,7 +20,8 @@ def validate_player_type(player_type):
 
 PLAYER_TYPES = [
     ('human', 'Human'),
-    ('xo.players.RandomPlayer', 'Random player')
+    ('xo.players.RandomPlayer', 'Random player'),
+    ('xo.players.MinimaxPlayer', 'Minimax player')
 ]
 
 
@@ -29,18 +30,21 @@ class NewGameForm(forms.Form):
     n_rows = forms.IntegerField(initial=3, min_value=3, max_value=5)
     n_cols = forms.IntegerField(initial=3, min_value=3, max_value=5)
     n_connects = forms.IntegerField(initial=3, min_value=3, max_value=5)
-    player1 = forms.CharField(widget=forms.Select(choices=PLAYER_TYPES))
-    player2 = forms.CharField(widget=forms.Select(choices=PLAYER_TYPES[::-1]))
+    player_x = forms.CharField(widget=forms.Select(choices=PLAYER_TYPES))
+    player_o = forms.CharField(widget=forms.Select(choices=PLAYER_TYPES[::-1]))
 
     def create(self):
         players = [
-            self.cleaned_data['player1'], 
-            self.cleaned_data['player2']
+            self.cleaned_data['player_x'], 
+            self.cleaned_data['player_o'],
         ]
-        random.shuffle(players)
         return Game.objects.create(
             player_x=players[0],
-            player_o=players[1]
+            player_o=players[1],
+            n_rows=self.cleaned_data['n_rows'],
+            n_cols=self.cleaned_data['n_cols'],
+            n_connects=self.cleaned_data['n_connects'],
+            is_kriegspiel=self.cleaned_data['is_kriegspiel']
         )
 
     def clean(self):

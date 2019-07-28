@@ -1,0 +1,67 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'xo/main.css' %}">
+
+<body>
+    {% with next_player=game.next_player game_over=game.is_game_over %}
+        <div class="text-center" id="box-5x5">
+            <header>
+                <h1>{{ game.n_rows }} x {{ game.n_cols }} board</h1>
+            </header>
+            {% if game_over == 'X' %}
+                <div id="message">
+                    <div>Player X wins!</div>
+                    <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
+                </div>
+            {% elif game_over == 'O' %}
+                <div id="message">
+                    <div>Player O wins!</div>
+                    <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
+                </div>
+            {% elif game_over == ' ' %}
+                <div id="message">
+                    <div>Game drawn.</div>
+                    <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
+                </div>
+            {% else %}
+                <div id="message">Player {{ next_player }}'s turn</div>
+            {% endif %}
+            <div class="board">
+                <div>
+                    {% include "includes/square.html" with game=game index=0 value=game.board_str.0 %}
+                    {% include "includes/square.html" with game=game index=1 value=game.board_str.1 %}
+                    {% include "includes/square.html" with game=game index=2 value=game.board_str.2 %}
+                    {% include "includes/square.html" with game=game index=3 value=game.board_str.3 %}
+                    {% include "includes/square.html" with game=game index=4 value=game.board_str.4 %}
+                </div>
+                <div>
+                    {% include "includes/square.html" with game=game index=5 value=game.board_str.5 %}
+                    {% include "includes/square.html" with game=game index=6 value=game.board_str.6 %}
+                    {% include "includes/square.html" with game=game index=7 value=game.board_str.7 %}
+                    {% include "includes/square.html" with game=game index=8 value=game.board_str.8 %}
+                    {% include "includes/square.html" with game=game index=9 value=game.board_str.9 %}
+                </div>
+                <div>
+                    {% include "includes/square.html" with game=game index=10 value=game.board_str.10 %}
+                    {% include "includes/square.html" with game=game index=11 value=game.board_str.11 %}
+                    {% include "includes/square.html" with game=game index=12 value=game.board_str.12 %}
+                    {% include "includes/square.html" with game=game index=13 value=game.board_str.13 %}
+                    {% include "includes/square.html" with game=game index=14 value=game.board_str.14 %}
+                </div>
+                <div>
+                    {% include "includes/square.html" with game=game index=15 value=game.board_str.15 %}
+                    {% include "includes/square.html" with game=game index=16 value=game.board_str.16 %}
+                    {% include "includes/square.html" with game=game index=17 value=game.board_str.17 %}
+                    {% include "includes/square.html" with game=game index=18 value=game.board_str.18 %}
+                    {% include "includes/square.html" with game=game index=19 value=game.board_str.19 %}
+                </div>
+                <div>
+                    {% include "includes/square.html" with game=game index=20 value=game.board_str.20 %}
+                    {% include "includes/square.html" with game=game index=21 value=game.board_str.21 %}
+                    {% include "includes/square.html" with game=game index=22 value=game.board_str.22 %}
+                    {% include "includes/square.html" with game=game index=23 value=game.board_str.23 %}
+                    {% include "includes/square.html" with game=game index=24 value=game.board_str.24 %}
+                </div>
+            </div>
+        </div>
+    {% endwith %}
+</body>
