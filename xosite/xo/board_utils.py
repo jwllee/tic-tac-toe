@@ -1,4 +1,17 @@
-wins_3x3 = [
+def get_board_wins(n_rows, n_cols, n_connects):
+    wins = None
+    if (n_rows, n_cols, n_connects) == (3, 3, 3):
+        wins = wins_3x3x3
+    elif (n_rows, n_cols, n_connects) == (4, 4, 4):
+        wins = wins_4x4x4 
+    else:
+        err_msg = 'Do not have wins cache for ({}, {}, {}) game'
+        err_msg = err_msg.format(n_rows, n_cols, n_connects)
+        raise ValueError(err_msg)
+    return wins
+
+
+wins_3x3x3 = [
     0b000000111,    # rows
     0b000111000,
     0b111000000,
@@ -9,7 +22,7 @@ wins_3x3 = [
     0b001010100,
 ]
 
-wins_4x4 = [
+wins_4x4x4 = [
     0b0000000000001111, # rows
     0b0000000011110000,
     0b0000111100000000,

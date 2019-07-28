@@ -11,7 +11,7 @@ class GameModelTests(TestCase):
         game.board_o = 0b000001111
         # 5 - 8 are with x
         game.board_x = 0b111110000
-        self.assertIs(game.is_drawn, True)
+        self.assertIs(game.is_filled, True)
 
     def test_3x3_full_state(self):
         game = Game(n_rows=3, n_cols=3)
