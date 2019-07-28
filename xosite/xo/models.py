@@ -141,18 +141,16 @@ class BoardState(models.Model):
     n_cols = models.IntegerField(default=3)
     n_connects = models.IntegerField(default=3)
 
-    is_max = models.BooleanField(default=True)
-    depth = models.PositiveIntegerField(default=0)
+    is_exact = models.BooleanField(default=False)
     value = models.IntegerField()
 
     def __repr__(self):
-        repr_ = 'BoardState({}, {}, {}, "{}", {}, {}, {})'
+        repr_ = 'BoardState({}, {}, {}, "{}", {}, {})'
         repr_ = repr_.format(self.n_rows, 
                              self.n_cols,
                              self.n_connects,
                              self.board_str,
-                             self.is_max,
-                             self.depth,
+                             self.is_exact,
                              self.value)
         return repr_
 
@@ -175,7 +173,7 @@ class BoardState(models.Model):
         return s
 
     @classmethod
-    def cache(cls, board_x, board_o, n_rows, n_cols, n_connects, is_max, depth, value):
+    def cache(cls, board_x, board_o, n_rows, n_cols, n_connects, value, is_exact):
         # cache if it's not already there
         results = BoardState.objects.filter(
             n_rows__exact=n_rows,
@@ -183,7 +181,7 @@ class BoardState(models.Model):
             n_connects__exact=n_connects,
             board_x__exact=board_x,
             board_o__exact=board_o,
-            is_max__exact=is_max)
+        )
 
         if len(results):
             return
@@ -194,12 +192,12 @@ class BoardState(models.Model):
             n_rows=n_rows,
             n_cols=n_cols,
             n_connects=n_connects,
-            depth=depth,
-            is_max=is_max,
-            value=value)
+            is_exact=is_exact,
+            value=value
+        )
 
     @classmethod
-    def get_cache(cls, board_x, board_o, n_rows, n_cols, n_connects, is_max, depth):
+    def get_cache(cls, board_x, board_o, n_rows, n_cols, n_connects):
         cache = None
         results = BoardState.objects.filter(
             n_rows__exact=n_rows,
@@ -207,8 +205,8 @@ class BoardState(models.Model):
             n_connects__exact=n_connects,
             board_x__exact=board_x,
             board_o__exact=board_o,
-            is_max__exact=is_max).order_by('depth')
+        ).order_by('is_exact')
         len_ = len(results)
         if len_ > 0:
-            cache = results[len_ - 1]
+            cache = results[0]
         return cache
