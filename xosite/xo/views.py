@@ -27,6 +27,8 @@ def get_board_html(n_rows, n_cols):
         html = 'xo/3x3.html'
     elif n_rows == 4 and n_cols == 4:
         html = 'xo/4x4.html'
+    elif n_rows == 5 and n_cols == 5:
+        html = 'xo/5x5.html'
     else:
         err_msg = 'Do not have html for dimension: ({}, {})'
         err_msg = err_msg.format(n_rows, n_cols)
@@ -46,8 +48,9 @@ def game(request, pk):
     if request.method == 'POST':
         form = MoveForm(request.POST)
         if form.is_valid():
-            game.play(form.cleaned_data['index'])
-            game.save()
+            if game.is_next_player_human():
+                game.play(form.cleaned_data['index'])
+                game.save()
             return redirect(game)
         else:
             err_msg = 'MoveForm invalid, should not happen'

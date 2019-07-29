@@ -1,4 +1,4 @@
-import time
+import time, operator
 import numpy as np
 from collections import namedtuple
 from . import board_utils
@@ -86,27 +86,36 @@ def get_best_move(game):
     color = 1 if eval_marker == board_utils.MARKER_X else -1
     alpha = -np.inf
     beta = np.inf
-    depth_limit = 10
+    # seconds
+    remaining_time = 60 * 10
+    depth_limit = 3
 
-    info_msg = 'Getting best move for Player {} at {} with depth limit {}'
-    info_msg = info_msg.format(eval_marker, game, depth_limit)
+    info_msg = 'Getting best move for Player {} at {} within {} seconds'
+    info_msg = info_msg.format(eval_marker, game, remaining_time)
     print(info_msg)
 
-    utility, best_move = get_negamax(state, eval_marker, depth_limit, alpha, beta, color)
+    it = 1
+    while remaining_time > 0:
+        info_msg = 'Iteration {}: depth limit: {} remaining time: {:.3f}s'
+        info_msg = info_msg.format(it, depth_limit, remaining_time)
+        print(info_msg)
+
+        utility, best_move, flag, remaining_time = get_negamax(
+            state, eval_marker, depth_limit, alpha, beta, color, True, remaining_time)
+
+        if flag == board_utils.EXACT:
+            break
+
+        depth_limit *= 2
+        it += 1
 
     end = time.time()
     took = end - start
 
-    # update the cache for state
-    # save_cache(state, best_score, True)
-
-    info_msg = 'Took {:.3f}s to compute minimax value'
-    info_msg = info_msg.format(took)
-    print(info_msg)
-
     state_utility = color * utility
-    info_msg = 'Minimax move for Player {} is index {} with value {}'
-    info_msg = info_msg.format(eval_marker, best_move, state_utility)
+    flag_str = board_utils.flag2str(flag)
+    info_msg = 'Minimax move for Player {} is index {} with "{}" value {}'
+    info_msg = info_msg.format(eval_marker, best_move, flag_str, state_utility)
     print(info_msg)
 
     return best_move
@@ -123,7 +132,7 @@ def is_game_over(state):
     return is_over
 
 
-def save_cache(state, utility, is_exact):
+def save_cache(state, utility, flag):
     models.BoardState.cache(
         state.board_x,
         state.board_o,
@@ -131,7 +140,7 @@ def save_cache(state, utility, is_exact):
         state.n_cols,
         state.n_connects,
         utility,
-        is_exact,
+        flag
     )
 
 
@@ -146,21 +155,96 @@ def get_cache(state):
     return result
 
 
-def get_negamax(state, marker, depth, alpha, beta, color):
+def get_heuristic(state, max_score):
+    win_board = board_utils.get_board_wins(state.n_rows, state.n_cols, state.n_connects)
+    n_wins = len(win_board)
+
+    # measure its closeness to winning to all the wins
+    max_score = -np.inf
+    n_cells = state.n_rows * state.n_cols
+    marker = board_utils.get_next_player(state.board_x, state.board_o, n_cells)
+    board = state.board_x if marker == board_utils.MARKER_X else state.board_o
+
+    for win in win_board:
+        same = board & win
+        score = bin(same).count('1') 
+        max_score = max(score, max_score)
+
+    max_score = max_score if marker == board_utils.MARKER_X else -max_score
+
+    return max_score
+
+
+def sort_empty_indexes(state, marker, empty_indexes):
+    to_sort = list()
+    unknown = list()
     max_score = get_max_score(state.n_rows, state.n_cols)
 
-    if depth == 0 or is_game_over(state):
-        return color * get_utility(state, max_score), None
+    for index in empty_indexes:
+        child = mark_cell(state, marker, index)
+        cache = get_cache(child)
+        if cache:
+            to_sort.append((index, cache.value, cache.flag))
+        else:
+            # use heuristic
+            heuristic = get_heuristic(child, max_score)
+            to_sort.append((index, heuristic, board_utils.HEURISTIC))
+
+    reverse = True if marker == board_utils.MARKER_X else False
+    flag_key = lambda tuple_: tuple_[2]
+    value_key = lambda tuple_: tuple_[1]
+    to_sort = sorted(to_sort, key=flag_key)
+    to_sort = sorted(to_sort, key=value_key, reverse=reverse)
+    results = list(map(lambda t: t[0], to_sort))
+    return results
+
+
+def get_negamax(state, marker, depth, alpha, beta, color, is_root, remaining_time):
+    time_start = time.time()
+    flag = board_utils.EXACT
+    max_score = get_max_score(state.n_rows, state.n_cols)
+    alpha_orig = alpha
+
+    if not is_root:
+        cache = get_cache(state)
+
+        if cache:
+            if cache.flag == board_utils.EXACT:
+                return cache.value, None, flag, remaining_time
+            elif cache.flag == board_utils.LOWER:
+                alpha = max(alpha, cache.value)
+            elif cache.flag == board_utils.UPPER:
+                beta = min(beta, cache.value)
+            elif cache.flag == board_utils.HEURISTIC:
+                if marker == board_utils.MARKER_X:
+                    alpha = cache.value
+                else:
+                    beta = cache.value
+
+        if alpha >= beta:
+            return cache.value, None, flag, remaining_time
+
+    if is_game_over(state):
+        return color * get_utility(state, max_score), None, flag, remaining_time
+
+    if depth == 0:
+        flag = board_utils.HEURISTIC
+        return color * get_heuristic(state, max_score), None, flag, remaining_time
 
     empty_indexes = get_empty_indexes(state)
+    empty_indexes = sort_empty_indexes(state, marker, empty_indexes)
+    
     best_score = -np.inf
     best_index = None
 
     for index in empty_indexes:
         child = mark_cell(state, marker, index)
         next_marker = board_utils.get_opposite_marker(marker)
-        child_value, _ = get_negamax(child, next_marker, depth - 1, -beta, -alpha, -color)
-        child_value = -child_value
+        child_result = get_negamax(
+            child, next_marker, depth - 1, -beta, -alpha, -color, False, remaining_time)
+        child_value = -child_result[0]
+        child_flag = child_result[2]
+        flag = child_flag if child_flag == board_utils.HEURISTIC else flag
         
         if child_value > best_score:
             best_score = child_value
@@ -170,4 +254,25 @@ def get_negamax(state, marker, depth, alpha, beta, color):
         if alpha >= beta:
             break
 
-    return best_score, best_index
+        time_check = time.time()
+        took = time_check - time_start
+        if took >= remaining_time:
+            break
+
+    if flag != board_utils.HEURISTIC:
+        if best_score <= alpha_orig:
+            flag = board_utils.UPPER
+        elif best_score >= beta:
+            flag = board_utils.LOWER
+        else:
+            flag = board_utils.EXACT
+
+        # only save non-heuristic values
+        save_cache(state, best_score, flag)
+
+    # update time
+    time_check = time.time()
+    took = time_check - time_start
+    remaining_time -= took
+
+    return best_score, best_index, flag, remaining_time

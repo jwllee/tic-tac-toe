@@ -1,5 +1,19 @@
 MARKER_X = 'X'
 MARKER_O = 'O'
+EXACT = 0
+LOWER = 1
+UPPER = 2
+HEURISTIC = 3
+
+
+def flag2str(flag):
+    d = {
+        EXACT: 'exact',
+        LOWER: 'lower',
+        UPPER: 'upper',
+        HEURISTIC: 'heuristic',
+    }
+    return d[flag]
 
 
 def get_empty_indexes(board_x, board_o, n_cells):
@@ -159,6 +173,7 @@ wins_5x5x5 = [
     0b0000000000000000000011111, # rows
     0b0000000000000001111100000,
     0b0000000000111110000000000,
+    0b0000011111000000000000000,
     0b1111100000000000000000000,
     0b0000100001000010000100001, # columns
     0b0001000010000100001000010,

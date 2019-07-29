@@ -68,6 +68,12 @@ class Game(models.Model):
         return board_utils.get_next_player(
             self.board_x, self.board_o, self.n_cells)
 
+    def is_next_player_human(self):
+        if self.next_player == board_utils.MARKER_O:
+            return self.player_o == 'human'
+        else:
+            return self.player_x == 'human'
+
     @property
     def is_game_over(self):
         is_over =  board_utils.is_game_over(
@@ -141,17 +147,18 @@ class BoardState(models.Model):
     n_cols = models.IntegerField(default=3)
     n_connects = models.IntegerField(default=3)
 
-    is_exact = models.BooleanField(default=False)
+    flag = models.IntegerField(default=board_utils.EXACT)
     value = models.IntegerField()
 
     def __repr__(self):
         repr_ = 'BoardState({}, {}, {}, "{}", {}, {})'
+        flag_str = board_utils.flag2str(self.flag)
         repr_ = repr_.format(self.n_rows, 
                              self.n_cols,
                              self.n_connects,
                              self.board_str,
-                             self.is_exact,
-                             self.value)
+                             self.value,
+                             flag_str)
         return repr_
 
     def __str__(self):
@@ -173,7 +180,7 @@ class BoardState(models.Model):
         return s
 
     @classmethod
-    def cache(cls, board_x, board_o, n_rows, n_cols, n_connects, value, is_exact):
+    def cache(cls, board_x, board_o, n_rows, n_cols, n_connects, value, flag):
         # cache if it's not already there
         results = BoardState.objects.filter(
             n_rows__exact=n_rows,
@@ -181,6 +188,7 @@ class BoardState(models.Model):
             n_connects__exact=n_connects,
             board_x__exact=board_x,
             board_o__exact=board_o,
+            flag__exact=flag,
         )
 
         if len(results):
@@ -192,7 +200,7 @@ class BoardState(models.Model):
             n_rows=n_rows,
             n_cols=n_cols,
             n_connects=n_connects,
-            is_exact=is_exact,
+            flag=flag,
             value=value
         )
 
@@ -205,7 +213,7 @@ class BoardState(models.Model):
             n_connects__exact=n_connects,
             board_x__exact=board_x,
             board_o__exact=board_o,
-        ).order_by('is_exact')
+        ).order_by('flag')
         len_ = len(results)
         if len_ > 0:
             cache = results[0]
