@@ -76,6 +76,13 @@ def get_empty_indexes(state):
     return empty_indexes
 
 
+def get_depth_bound(state):
+    """Search depth cannot be more than the number of empty spaces.
+    """
+    empty_indexes = get_empty_indexes(state)
+    return len(empty_indexes)
+
+
 def get_best_move(game):
     start = time.time()
     state = State(
@@ -88,8 +95,10 @@ def get_best_move(game):
     alpha = -np.inf
     beta = np.inf
     # seconds
-    remaining_time = 60 * 60 * 2
-    depth_limit = 3
+    remaining_time = 5
+    # at least 3 steps ahead
+    depth = 1
+    depth_bound = get_depth_bound(state)
 
     info_msg = 'Getting best move for Player {} at {} within {} seconds'
     info_msg = info_msg.format(eval_marker, game, remaining_time)
@@ -97,17 +106,17 @@ def get_best_move(game):
 
     it = 1
     while remaining_time > 0:
-        info_msg = 'Iteration {}: depth limit: {} remaining time: {:.3f}s'
-        info_msg = info_msg.format(it, depth_limit, remaining_time)
+        info_msg = 'Iteration {}: depth: {}, depth bound: {} remaining time: {:.3f}s'
+        info_msg = info_msg.format(it, depth, depth_bound, remaining_time)
         print(info_msg)
 
         utility, best_move, flag, remaining_time = get_negamax(
-            state, eval_marker, depth_limit, alpha, beta, color, True, remaining_time)
+            state, eval_marker, depth, alpha, beta, color, True, remaining_time)
 
-        if flag == board_utils.EXACT:
+        if depth == depth_bound:
             break
 
-        depth_limit *= 2
+        depth = 1 + depth if 1 + depth <= depth_bound else depth_bound
         it += 1
 
     end = time.time()
@@ -115,8 +124,8 @@ def get_best_move(game):
 
     state_utility = color * utility
     flag_str = board_utils.flag2str(flag)
-    info_msg = 'Minimax move for Player {} is index {} with "{}" value {}'
-    info_msg = info_msg.format(eval_marker, best_move, flag_str, state_utility)
+    info_msg = 'Minimax move for Player {} is index {} with "{}" value {} at depth {} with remaining time: {:.3f}s'
+    info_msg = info_msg.format(eval_marker, best_move, flag_str, state_utility, depth, remaining_time)
     print(info_msg)
 
     return best_move
@@ -133,13 +142,16 @@ def is_game_over(state):
     return is_over
 
 
-def save_cache(state, utility, flag):
+def save_cache(state, depth, utility, flag):
+    # make sure depth is valid 
+    depth = depth if depth < 1 << 31 else 1 << 31
     models.BoardState.cache(
         state.board_x,
         state.board_o,
         state.n_rows,
         state.n_cols,
         state.n_connects,
+        depth,
         utility,
         flag
     )
@@ -209,18 +221,13 @@ def get_negamax(state, marker, depth, alpha, beta, color, is_root, remaining_tim
     if not is_root:
         cache = get_cache(state)
 
-        if cache:
+        if cache and cache.depth >= depth:
             if cache.flag == board_utils.EXACT:
                 return cache.value, None, flag, remaining_time
             elif cache.flag == board_utils.LOWER:
                 alpha = max(alpha, cache.value)
             elif cache.flag == board_utils.UPPER:
                 beta = min(beta, cache.value)
-            elif cache.flag == board_utils.HEURISTIC:
-                if marker == board_utils.MARKER_X:
-                    alpha = cache.value
-                else:
-                    beta = cache.value
 
         if alpha >= beta:
             return cache.value, None, flag, remaining_time
@@ -260,16 +267,15 @@ def get_negamax(state, marker, depth, alpha, beta, color, is_root, remaining_tim
         if took >= remaining_time:
             break
 
-    if flag != board_utils.HEURISTIC:
-        if best_score <= alpha_orig:
-            flag = board_utils.UPPER
-        elif best_score >= beta:
-            flag = board_utils.LOWER
-        else:
-            flag = board_utils.EXACT
+    if best_score <= alpha_orig:
+        flag = board_utils.UPPER
+    elif best_score >= beta:
+        flag = board_utils.LOWER
+    else:
+        flag = board_utils.EXACT
 
     # only save non-heuristic values
-    save_cache(state, best_score, flag)
+    save_cache(state, depth, best_score, flag)
 
     # update time
     time_check = time.time()

@@ -147,16 +147,18 @@ class BoardState(models.Model):
     n_cols = models.IntegerField(default=3)
     n_connects = models.IntegerField(default=3)
 
+    depth = models.IntegerField(default=0)
     flag = models.IntegerField(default=board_utils.EXACT)
     value = models.IntegerField()
 
     def __repr__(self):
-        repr_ = 'BoardState({}, {}, {}, "{}", {}, {})'
+        repr_ = 'BoardState({}, {}, {}, "{}", {}, {}, {})'
         flag_str = board_utils.flag2str(self.flag)
         repr_ = repr_.format(self.n_rows, 
                              self.n_cols,
                              self.n_connects,
                              self.board_str,
+                             self.depth,
                              self.value,
                              flag_str)
         return repr_
@@ -180,7 +182,7 @@ class BoardState(models.Model):
         return s
 
     @classmethod
-    def cache(cls, board_x, board_o, n_rows, n_cols, n_connects, value, flag):
+    def cache(cls, board_x, board_o, n_rows, n_cols, n_connects, depth, value, flag):
         # cache if it's not already there
         results = BoardState.objects.filter(
             n_rows__exact=n_rows,
@@ -189,6 +191,7 @@ class BoardState(models.Model):
             board_x__exact=board_x,
             board_o__exact=board_o,
             flag__exact=flag,
+            depth__gte=depth,
         )
 
         if len(results):
@@ -201,7 +204,8 @@ class BoardState(models.Model):
             n_cols=n_cols,
             n_connects=n_connects,
             flag=flag,
-            value=value
+            value=value,
+            depth=depth,
         )
 
     @classmethod
@@ -213,7 +217,7 @@ class BoardState(models.Model):
             n_connects__exact=n_connects,
             board_x__exact=board_x,
             board_o__exact=board_o,
-        ).order_by('flag')
+        ).order_by('flag', '-depth')
         len_ = len(results)
         if len_ > 0:
             cache = results[0]
