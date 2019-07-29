@@ -3,6 +3,7 @@ import numpy as np
 from collections import namedtuple
 from . import board_utils
 from . import models
+from .utils import timeit
 
 
 field_names = [
@@ -87,7 +88,7 @@ def get_best_move(game):
     alpha = -np.inf
     beta = np.inf
     # seconds
-    remaining_time = 60 * 10
+    remaining_time = 60 * 60 * 2
     depth_limit = 3
 
     info_msg = 'Getting best move for Player {} at {} within {} seconds'
@@ -267,8 +268,8 @@ def get_negamax(state, marker, depth, alpha, beta, color, is_root, remaining_tim
         else:
             flag = board_utils.EXACT
 
-        # only save non-heuristic values
-        save_cache(state, best_score, flag)
+    # only save non-heuristic values
+    save_cache(state, best_score, flag)
 
     # update time
     time_check = time.time()
