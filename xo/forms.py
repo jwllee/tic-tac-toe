@@ -41,6 +41,8 @@ class NewGameForm(forms.Form):
         return Game.objects.create(
             player_x=players[0],
             player_o=players[1],
+            board_x=0,
+            board_o=0,
             n_rows=self.cleaned_data['n_rows'],
             n_cols=self.cleaned_data['n_cols'],
             n_connects=self.cleaned_data['n_connects'],
