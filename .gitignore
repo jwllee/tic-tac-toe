@@ -270,3 +270,4 @@ dmypy.json
 
 cache/
 venv/
+.env
