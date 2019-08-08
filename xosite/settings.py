@@ -25,7 +25,10 @@ SECRET_KEY = 'vwx0$vhpvi8v1s*0m+!3901a84=z#_%ra!9^s%q12+tb0wi)yr'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'tictactoe-minimax.herokuapp.com',
+]
 
 
 # Application definition
