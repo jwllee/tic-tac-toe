@@ -1,0 +1,6 @@
+{
+  "name": "Tic Tac Toe application",
+  "description": "Tic Tac Toe web application",
+  "image": "heroku/python",
+  "addons": [ "heroku-postgresql" ],
+}
