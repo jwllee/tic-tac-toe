@@ -15,8 +15,8 @@ class Game(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
 
     # goes up to 2^31 - 1, so 5x5 has 25 cells is still ok
-    board_x = models.IntegerField(default=0)
-    board_o = models.IntegerField(default=0)
+    board_x = models.PositiveIntegerField(default=0)
+    board_o = models.PositiveIntegerField(default=0)
 
     player_x = models.CharField(max_length=64)
     player_o = models.CharField(max_length=64)
