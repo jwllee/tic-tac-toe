@@ -26,8 +26,7 @@ SECRET_KEY = 'vwx0$vhpvi8v1s*0m+!3901a84=z#_%ra!9^s%q12+tb0wi)yr'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'tictactoe-minimax.herokuapp.com',
+    'tictactoe-minimax.herokuapp.com'
 ]
 
 
