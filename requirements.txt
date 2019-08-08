@@ -11,3 +11,4 @@ pandas>=0.25.0
 petname>=2.6
 psycopg2>=2.8.3
 pytest
+dj-database-url>=0.5.0
