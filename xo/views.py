@@ -49,7 +49,9 @@ def game(request, pk):
         form = MoveForm(request.POST)
         if form.is_valid():
             if game.is_next_player_human():
-                game.play(form.cleaned_data['index'])
+                row_ind = form.cleaned_data['row_index']
+                col_ind = form.cleaned_data['col_index']
+                game.play_xy(row_ind, col_ind)
                 game.save()
             return redirect(game)
         else:
@@ -59,10 +61,10 @@ def game(request, pk):
         game.play_auto()
         game.save()
 
-    board_width = (game.n_rows + 1) * 90 - 10
+    board_width = (game.n_cols + 1) * 90 - 10
     print('Board width: {}'.format(board_width))
 
-    html = get_board_html(game.n_rows, game.n_cols)
+    # html = get_board_html(game.n_rows, game.n_cols)
     html = 'xo/nxn.html'
     context = {
         'game': game,

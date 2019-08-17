@@ -1,4 +1,5 @@
 import numpy as np
+from xo import win_state_utils
 
 
 MARKER_X = 'X'
@@ -95,7 +96,7 @@ def is_filled(board_x, board_o, full_state):
 
 def is_game_over(board_x, board_o, n_rows, n_cols, n_connects):
     # check for drawn first
-    board_win = get_board_wins(n_rows, n_cols, n_connects)
+    board_win = win_state_utils.get_board_wins(n_rows, n_cols, n_connects)
     # None for ongoing
     result = None
     for win in board_win:
@@ -184,8 +185,12 @@ wins_4x4x3 = [
     0b1000100010000000, 
     0b0000010000100001, # diagonals
     0b1000010000100000, 
+    0b0000100001000010,
+    0b0100001000010000,
+    0b0000000100100100,
     0b0000001001001000,
     0b0001001001000000,
+    0b0010010010000000,
 ]
 
 

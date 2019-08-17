@@ -4,6 +4,10 @@ from django.shortcuts import reverse
 
 from .players import get_player
 from . import board_utils
+from xo.utils import make_logger
+
+
+logger = make_logger('models.py')
 
 
 MARKER_X = 'X'
@@ -56,8 +60,14 @@ class Game(models.Model):
 
     @property
     def board_mat(self):
-        return board_utils.get_board_mat(
+        mat = board_utils.get_board_mat(
             self.board_x, self.board_o, self.n_rows, self.n_cols)
+        
+        info_msg = '({}x{}) board mat: \n{}'
+        info_msg = info_msg.format(self.n_rows, self.n_cols, mat)
+        logger.info(info_msg)
+
+        return mat
 
     @property
     def full_state(self):
@@ -119,6 +129,10 @@ class Game(models.Model):
                 player = self.player_x if next_player  == MARKER_X else self.player_o
                 player_obj = get_player(player)
                 self.play(player_obj.play(self))
+
+    def play_xy(self, row_ind, col_ind):
+        index = row_ind * self.n_cols + col_ind
+        self.play(index)
 
     def play(self, index):
         info_msg = 'Player {} playing index {} at game {}'

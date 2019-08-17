@@ -1,7 +1,7 @@
 import time, operator
 import numpy as np
 from collections import namedtuple
-from . import board_utils
+from . import board_utils, win_state_utils
 from . import models
 from .utils import timeit
 
@@ -169,7 +169,7 @@ def get_cache(state):
 
 
 def get_heuristic(state, max_score):
-    win_board = board_utils.get_board_wins(state.n_rows, state.n_cols, state.n_connects)
+    win_board = win_state_utils.get_board_wins(state.n_rows, state.n_cols, state.n_connects)
     n_wins = len(win_board)
 
     # measure its closeness to winning to all the wins
