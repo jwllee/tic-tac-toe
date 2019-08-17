@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 
-from .models import Game
+from xo.models import Game
 from xo import board_utils
 
 
@@ -71,16 +71,4 @@ class GameModelTests(TestCase):
         expected = 'X   O   X'
         self.assertEqual(board_str, expected)
 
-
-class BoardWinTests(TestCase):
-    def test_compute_row_cache(self):
-        n_rows, n_cols, n_connects = 3, 3, 3
-        wins = board_utils.compute_row_cache(n_rows, n_cols, n_connects)
-
-        expected = [
-            0b000000111,    # rows
-            0b000111000,
-            0b111000000,
-        ]
-        assert wins == expected
 
