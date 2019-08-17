@@ -59,10 +59,16 @@ def game(request, pk):
         game.play_auto()
         game.save()
 
+    board_width = (game.n_rows + 1) * 90 - 10
+    print('Board width: {}'.format(board_width))
+
     html = get_board_html(game.n_rows, game.n_cols)
-    return render(request, html, {
-        'game': game
-    })
+    html = 'xo/nxn.html'
+    context = {
+        'game': game,
+        'board_width': board_width,
+    }
+    return render(request, html, context)
 
 
 def board_3x3(request):

@@ -55,12 +55,17 @@ class Game(models.Model):
             self.board_x, self.board_o, self.n_cells)
 
     @property
+    def board_mat(self):
+        return board_utils.get_board_mat(
+            self.board_x, self.board_o, self.n_rows, self.n_cols)
+
+    @property
     def full_state(self):
         return (1 << self.n_cells) - 1
 
     @property
     def is_filled(self):
-        board_utils.is_filled(
+        return board_utils.is_filled(
             self.board_x, self.board_o, self.full_state)
 
     @property

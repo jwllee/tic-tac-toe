@@ -1,3 +1,6 @@
+import numpy as np
+
+
 MARKER_X = 'X'
 MARKER_O = 'O'
 EXACT = 0
@@ -40,6 +43,23 @@ def get_board_str(board_x, board_o, n_cells):
             v = MARKER_O
         s += v
     return s
+
+
+def get_board_mat(board_x, board_o, n_rows, n_cols):
+    n_cells = n_rows * n_cols
+    mat = np.empty(n_cells, dtype=np.str)
+    for i in range(n_cells):
+        v = ' '
+        flag = 1 << i
+        has_x = board_x & flag
+        has_o = board_o & flag
+        if has_x:
+            v = MARKER_X
+        if has_o:
+            v = MARKER_O
+        mat[i] = v
+    mat = mat.reshape((n_rows, n_cols))
+    return mat
 
 
 def get_opposite_marker(marker):

@@ -26,10 +26,12 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
-    'tictactoe-minimax.herokuapp.com'
+    'tictactoe-minimax.herokuapp.com',
+    '127.0.0.1',
+    'localhost'
 ]
 
 
@@ -88,7 +90,7 @@ DATABASES = {
         'USER': 'jwllee',
         'PASSWORD': 'HEBSp8Vc3Oypy7AAW4hf',
         'HOST': 'localhost',
-        'PORT': '',
+        'PORT': '5432',
     }
 }
 db_from_env = dj_database_url.config(conn_max_age=600)

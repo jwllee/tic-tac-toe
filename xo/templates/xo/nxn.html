@@ -1,0 +1,39 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'xo/main.css' %}">
+
+<body>
+    {% with next_player=game.next_player game_over=game.is_game_over %}
+    <div class="text-center" id="box" style="width:{{ board_width}}px"> 
+        <header>
+            <h1>{{ game.n_rows }} x {{ game.n_cols }} board</h1>
+        </header>
+        {% if game_over == 'X' %}
+            <div id="message">
+                <div>Player X wins!</div>
+                <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
+            </div>
+        {% elif game_over == 'O' %}
+            <div id="message">
+                <div>Player O wins!</div>
+                <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
+            </div>
+        {% elif game_over == ' ' %}
+            <div id="message">
+                <div>Game drawn.</div>
+                <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
+            </div>
+        {% else %}
+            <div id="message">Player {{ next_player }}'s turn</div>
+        {% endif %}
+        <div class="board">
+            {% for row in game.board_mat %}
+                <div>
+                    {% for value in row %}
+                        {% include "includes/square1.html" with game=game row_index=forloop.parentloop.counter0 col_index=forloop.counter0 value=value %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endwith %}
+</body>
