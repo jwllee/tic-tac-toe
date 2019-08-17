@@ -67,4 +67,5 @@ class NewGameForm(forms.Form):
 
 
 class MoveForm(forms.Form):
-    index = forms.IntegerField(min_value=0)
+    row_index = forms.IntegerField(min_value=0)
+    col_index = forms.IntegerField(min_value=0)
