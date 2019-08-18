@@ -96,7 +96,7 @@ def get_best_move(game):
     alpha = -np.inf
     beta = np.inf
     # seconds
-    remaining_time = 2
+    remaining_time = 5
     # at least 3 steps ahead
     depth = 1
     depth_bound = get_depth_bound(state)
