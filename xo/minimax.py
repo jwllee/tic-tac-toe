@@ -4,6 +4,7 @@ from collections import namedtuple
 from . import board_utils, win_state_utils
 from . import models
 from .utils import timeit
+from xo.transposition_table import TTable
 
 
 field_names = [
@@ -95,7 +96,7 @@ def get_best_move(game):
     alpha = -np.inf
     beta = np.inf
     # seconds
-    remaining_time = 5
+    remaining_time = 2
     # at least 3 steps ahead
     depth = 1
     depth_bound = get_depth_bound(state)
@@ -104,6 +105,8 @@ def get_best_move(game):
     info_msg = info_msg.format(eval_marker, game, remaining_time)
     print(info_msg)
 
+    ttable = TTable()
+
     it = 1
     while remaining_time > 0:
         info_msg = 'Iteration {}: depth: {}, depth bound: {} remaining time: {:.3f}s'
@@ -111,7 +114,7 @@ def get_best_move(game):
         print(info_msg)
 
         utility, best_move, flag, remaining_time = get_negamax(
-            state, eval_marker, depth, alpha, beta, color, True, remaining_time)
+            state, eval_marker, depth, alpha, beta, color, True, remaining_time, ttable)
 
         if depth == depth_bound:
             break
@@ -201,14 +204,15 @@ def get_heuristic(state, max_score):
     return max_score
 
 
-def sort_empty_indexes(state, marker, empty_indexes):
+def sort_empty_indexes(state, marker, empty_indexes, ttable):
     to_sort = list()
     unknown = list()
     max_score = get_max_score(state.n_rows, state.n_cols)
 
     for index in empty_indexes:
         child = mark_cell(state, marker, index)
-        cache = get_cache(child)
+        # cache = get_cache(child)
+        cache = ttable.get_cache(child)
         if cache:
             to_sort.append((index, cache.value, cache.flag))
         else:
@@ -225,14 +229,15 @@ def sort_empty_indexes(state, marker, empty_indexes):
     return results
 
 
-def get_negamax(state, marker, depth, alpha, beta, color, is_root, remaining_time):
+def get_negamax(state, marker, depth, alpha, beta, color, is_root, remaining_time, ttable):
     time_start = time.time()
     flag = board_utils.EXACT
     max_score = get_max_score(state.n_rows, state.n_cols)
     alpha_orig = alpha
 
     if not is_root:
-        cache = get_cache(state)
+        # cache = get_cache(state)
+        cache = ttable.get_cache(state)
 
         if cache and cache.depth >= depth:
             if cache.flag == board_utils.EXACT:
@@ -253,7 +258,7 @@ def get_negamax(state, marker, depth, alpha, beta, color, is_root, remaining_tim
         return color * get_heuristic(state, max_score), None, flag, remaining_time
 
     empty_indexes = get_empty_indexes(state)
-    empty_indexes = sort_empty_indexes(state, marker, empty_indexes)
+    empty_indexes = sort_empty_indexes(state, marker, empty_indexes, ttable)
     
     best_score = -np.inf
     best_index = None
@@ -262,7 +267,7 @@ def get_negamax(state, marker, depth, alpha, beta, color, is_root, remaining_tim
         child = mark_cell(state, marker, index)
         next_marker = board_utils.get_opposite_marker(marker)
         child_result = get_negamax(
-            child, next_marker, depth - 1, -beta, -alpha, -color, False, remaining_time)
+            child, next_marker, depth - 1, -beta, -alpha, -color, False, remaining_time, ttable)
         child_value = -child_result[0]
         child_flag = child_result[2]
         flag = child_flag if child_flag == board_utils.HEURISTIC else flag
@@ -288,7 +293,8 @@ def get_negamax(state, marker, depth, alpha, beta, color, is_root, remaining_tim
         flag = board_utils.EXACT
 
     # only save non-heuristic values
-    save_cache(state, depth, best_score, flag)
+    # save_cache(state, depth, best_score, flag)
+    ttable.save_cache(state, depth, best_score, flag)
 
     # update time
     time_check = time.time()

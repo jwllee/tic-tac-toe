@@ -239,5 +239,11 @@ class BoardState(models.Model):
         ).order_by('flag', '-depth')
         len_ = len(results)
         if len_ > 0:
+
+            # info_msg = 'Number of cached states: {}'.format(len_)
+            # logger.info(info_msg)
+
             cache = results[0]
+            results.delete()
+
         return cache
