@@ -173,12 +173,25 @@ def get_heuristic(state, max_score):
     n_wins = len(win_board)
 
     # measure its closeness to winning to all the wins
-    max_score = -np.inf
+    # basically infinity
+    max_score = -(1 << 30)
     n_cells = state.n_rows * state.n_cols
     marker = board_utils.get_next_player(state.board_x, state.board_o, n_cells)
-    board = state.board_x if marker == board_utils.MARKER_X else state.board_o
+
+    if marker == board_utils.MARKER_X:
+        board = state.board_x
+        board_oppo = state.board_o
+    else:
+        board = state.board_o
+        board_oppo = state.board_x
 
     for win in win_board:
+        # first check if the win is possible to reach
+        # should equal 0 since where there's 1 in win state, it should be empty in opposition board
+        is_valid = (win & board_oppo) == 0
+        if not is_valid:
+            continue
+
         same = board & win
         score = bin(same).count('1') 
         max_score = max(score, max_score)
