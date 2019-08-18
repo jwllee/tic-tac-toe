@@ -1,3 +1,4 @@
+import numpy as np
 from django.test import TestCase
 from xo import win_state_utils as utils
 
@@ -233,6 +234,37 @@ class WinStateUtilsTest(TestCase):
 
         wins = sorted(wins)
         expected = sorted(expected)
+
+        assert_msg = '{} != {}'.format(expected, wins)
+        assert expected == wins, assert_msg
+
+    def test_compute_win_state_str_col_5x5x3(self):
+        def mat_str(arr, n_rows, n_cols):
+            s = ''
+            for row_ind in range(n_rows):
+                for col_ind in range(n_cols):
+                    ind = row_ind * n_cols + col_ind
+                    s += arr[ind]
+                s += '\n'
+            return s
+
+        n_rows, n_cols, n_connects = 5, 5, 3
+        wins = utils.compute_win_state_str_col(n_rows, n_cols, n_connects)
+
+        expected = [
+            '0000000000000010000100001', '0000000000000100001000010', '0000000000001000010000100', 
+            '0000000000010000100001000', '0000000000100001000010000', '0000000001000010000100000', 
+            '0000000010000100001000000', '0000000100001000010000000', '0000001000010000100000000', 
+            '0000010000100001000000000', '0000100001000010000000000', '0001000010000100000000000', 
+            '0010000100001000000000000', '0100001000010000000000000', '1000010000100000000000000'
+        ]
+
+        wins = sorted(wins)
+        expected = sorted(expected)
+
+        # for win in wins:
+        #    mat = mat_str(win, n_rows, n_cols)
+        #    print(mat)
 
         assert_msg = '{} != {}'.format(expected, wins)
         assert expected == wins, assert_msg
