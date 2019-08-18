@@ -123,4 +123,39 @@ def is_empty(board_x, board_o, index):
     return (has_x | has_o) == 0
 
 
+def reflect_y(board, n_rows, n_cols):
+    n_cells = n_rows * n_cols
+    reflected = 0
 
+    for ind in range(n_cells):
+        row_ind = ind // n_cols
+        col_ind = ind % n_cols
+        col_ind_r = n_cols - (col_ind + 1)
+        ind_r = row_ind * n_cols + col_ind_r
+
+        flag = 1 << ind
+        flag_r = 1 << ind_r
+        if (board & flag) == flag:
+            reflected |= flag_r
+
+    return reflected
+
+
+def reflect_x(board, n_rows, n_cols):
+    n_cells = n_rows * n_cols
+    reflected = 0
+
+    for ind in range(n_cells):
+        row_ind = ind // n_cols
+        col_ind = ind % n_cols
+
+        # same column but different row
+        row_ind_r = n_rows - (row_ind + 1)
+        ind_r = row_ind_r * n_cols + col_ind
+
+        flag = 1 << ind
+        flag_r = 1 << ind_r
+        if (board & flag) == flag:
+            reflected |= flag_r
+
+    return reflected

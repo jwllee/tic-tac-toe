@@ -1,6 +1,10 @@
 from xo import board_utils
+from xo.utils import make_logger
 import numpy as np
 from collections import namedtuple
+
+
+logger = make_logger('transposition_table.py')
 
 
 field_names = [
@@ -14,6 +18,16 @@ field_names = [
     'value'
 ]
 Cache = namedtuple('Cache', field_names)
+
+
+field_names = [
+    'n_rows',
+    'n_cols',
+    'n_connects',
+    'board_x',
+    'board_o',
+]
+State = namedtuple('State', field_names)
 
 
 def addition_hash(arr, sz):
@@ -39,7 +53,7 @@ class TTable:
     def __init__(self):
         self.table = dict()
 
-    def get_cache(self, state):
+    def __get_cache(self, state):
         hash_ = hash_state(state)
         res = None
         if hash_ in self.table:
@@ -49,6 +63,39 @@ class TTable:
             same_board_o = res.board_o == state.board_o
             if not same_board_x or not same_board_o:
                 res = None
+        return res
+
+    def get_cache(self, state):
+        res = self.__get_cache(state)
+        board_x = state.board_x
+        board_o = state.board_o
+        n_rows = state.n_rows
+        n_cols = state.n_cols
+        n_connects = state.n_connects
+        if not res:
+            # try reflecting the board on x axis
+            board_x_r = board_utils.reflect_x(board_x, n_rows, n_cols)
+            board_o_r = board_utils.reflect_x(board_o, n_rows, n_cols)
+            reflected = State(n_rows, n_cols, n_connects, board_x_r, board_o_r)
+            res = self.__get_cache(reflected)
+            # if not None, change it back to original board
+            if res:
+                # info_msg = 'Found cache via reflection on x axis'
+                # logger.info(info_msg)
+                res = Cache(board_x, board_o, n_rows, n_cols, n_connects, res.depth, res.flag, res.value)
+
+        if not res:
+            # try reflecting the board on y axis
+            board_x_r = board_utils.reflect_y(board_x, n_rows, n_cols)
+            board_o_r = board_utils.reflect_y(board_o, n_rows, n_cols)
+            reflected = State(n_rows, n_cols, n_connects, board_x_r, board_o_r)
+            res = self.__get_cache(reflected)
+            # if not None, change it back to original board
+            if res:
+                # info_msg = 'Found cache via reflection on y axis'
+                # logger.info(info_msg)
+                res = Cache(board_x, board_o, n_rows, n_cols, n_connects, res.depth, res.flag, res.value)
+
         return res
 
     def save_cache(self, state, depth, utility, flag):

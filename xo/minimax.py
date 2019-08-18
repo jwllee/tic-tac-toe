@@ -4,17 +4,7 @@ from collections import namedtuple
 from . import board_utils, win_state_utils
 from . import models
 from .utils import timeit
-from xo.transposition_table import TTable
-
-
-field_names = [
-    'n_rows',
-    'n_cols',
-    'n_connects',
-    'board_x',
-    'board_o',
-]
-State = namedtuple('State', field_names)
+from xo.transposition_table import TTable, State
 
 
 def get_max_score(n_rows, n_cols):
