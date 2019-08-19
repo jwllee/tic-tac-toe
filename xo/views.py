@@ -1,10 +1,16 @@
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.shortcuts import render, redirect, get_object_or_404, reverse
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 
 
 from .forms import NewGameForm, MoveForm
 from .models import Game
+from .utils import make_logger
+from xo.board_utils import MARKER_O, MARKER_X
+
+
+logger = make_logger('views.py')
 
 
 @require_http_methods(['GET', 'POST'])
@@ -71,6 +77,56 @@ def game(request, pk):
         'board_width': board_width,
     }
     return render(request, html, context)
+
+
+@ensure_csrf_cookie
+def board_update(request):
+    info_msg = 'Board update view function called'
+    logger.info(info_msg)
+
+    # get info
+    game_id = request.GET.get('game_id', -1)
+    row_ind = int(request.GET.get('row_index', -1))
+    col_ind = int(request.GET.get('col_index', -1))
+    player = request.GET.get('next_player', None)
+
+    info_msg = 'Game {}: cell ({}, {}) marked with {}'
+    info_msg = info_msg.format(game_id,
+                               row_ind, col_ind,
+                               player)
+    logger.info(info_msg)
+
+    # update game state
+    game = get_object_or_404(Game, pk=game_id)
+    if not (row_ind == -1 or col_ind == -1):
+        game.play_xy(row_ind, col_ind)
+
+    try:
+        move = game.play_next_auto()
+    except:
+        move = None
+    game.save()
+
+    # make message
+    if game.is_game_over == MARKER_X:
+        msg = 'Player X wins!'
+    elif game.is_game_over == MARKER_O:
+        msg = 'Player O wins!'
+    elif game.is_game_over == ' ':
+        msg = 'Game drawn.'
+    else:
+        msg = "Player {}'s turn"
+        msg = msg.format(game.next_player)
+
+    data = {
+        'message': msg,
+        'move': move,
+        'is_game_over': game.is_game_over,
+        'game_id': game_id,
+        'next_player': game.next_player,
+        'next_player_type': game.next_player_type,
+    }
+    return JsonResponse(data)
 
 
 def board_3x3(request):

@@ -4,6 +4,7 @@ from django.shortcuts import reverse
 
 from .players import get_player
 from . import board_utils
+from xo.board_utils import Move
 from xo.utils import make_logger
 
 
@@ -83,6 +84,25 @@ class Game(models.Model):
         return board_utils.get_next_player(
             self.board_x, self.board_o, self.n_cells)
 
+    @property
+    def cur_player(self):
+        return board_utils.get_cur_player(
+            self.board_x, self.board_o, self.n_cells)
+
+    @property
+    def cur_player_type(self):
+        if self.cur_player == board_utils.MARKER_O:
+            return self.player_o
+        else:
+            return self.player_x
+
+    @property
+    def next_player_type(self):
+        if self.next_player == board_utils.MARKER_O:
+            return self.player_o
+        else:
+            return self.player_x
+
     def is_next_player_human(self):
         if self.next_player == board_utils.MARKER_O:
             return self.player_o == 'human'
@@ -129,6 +149,31 @@ class Game(models.Model):
                 player = self.player_x if next_player  == MARKER_X else self.player_o
                 player_obj = get_player(player)
                 self.play(player_obj.play(self))
+
+    def play_next_auto(self):
+        # play next auto move if possible
+        if self.is_game_over:
+            err_msg = 'Cannot play next move for a game that has ended'
+            raise ValueError(err_msg)
+
+        if self.next_player_type == 'human':
+            return None
+
+        next_player = self.next_player
+        player = self.player_x if next_player == MARKER_X else self.player_o
+        player_obj = get_player(player)
+        index = player_obj.play(self)
+        self.play(index)
+
+        row_ind = index // self.n_cols
+        col_ind = index % self.n_cols
+        move = {
+            'row_ind': row_ind,
+            'col_ind': col_ind,
+            'marker': next_player,
+        }
+
+        return move
 
     def play_xy(self, row_ind, col_ind):
         index = row_ind * self.n_cols + col_ind

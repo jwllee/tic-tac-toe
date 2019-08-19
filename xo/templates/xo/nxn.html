@@ -1,35 +1,34 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'xo/main.css' %}">
+<meta name="crsf-token" content="{{ csrf_token }}">
 
 <body>
     {% with next_player=game.next_player game_over=game.is_game_over %}
-    <div class="text-center" id="box" style="width:{{ board_width}}px"> 
+    <div class="text-center" id="box" style="width:{{ board_width }}px"> 
         <header>
             <h1>{{ game.n_rows }} x {{ game.n_cols }} board</h1>
         </header>
-        {% if game_over == 'X' %}
-            <div id="message">
-                <div>Player X wins!</div>
-                <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
+            <div id="message" new-game-url="{% url 'xo:index' %}">
+                {% if game_over == 'X' %}
+                    <div>Player X wins!</div>
+                    <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
+                {% elif game_over == 'O' %}
+                    <div>Player O wins!</div>
+                    <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
+                {% elif game_over == ' ' %}
+                    <div>Game drawn.</div>
+                    <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
+                {% else %}
+                    <div>Player {{ next_player }}'s turn</div>
+                {% endif %}
             </div>
-        {% elif game_over == 'O' %}
-            <div id="message">
-                <div>Player O wins!</div>
-                <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
-            </div>
-        {% elif game_over == ' ' %}
-            <div id="message">
-                <div>Game drawn.</div>
-                <a href="{% url 'xo:index' %}" id="message">Start a new game.</a>
-            </div>
-        {% else %}
-            <div id="message">Player {{ next_player }}'s turn</div>
-        {% endif %}
         <div class="board">
             {% for row in game.board_mat %}
-                <div>
+            <div id="{{ forloop.counter0 }}" class="row">
                     {% for value in row %}
+                        <div>
                         {% include "includes/square1.html" with game=game row_index=forloop.parentloop.counter0 col_index=forloop.counter0 value=value %}
+                        </div>
                     {% endfor %}
                 </div>
             {% endfor %}
@@ -37,3 +36,5 @@
     </div>
     {% endwith %}
 </body>
+<script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/game.js' %}"></script>

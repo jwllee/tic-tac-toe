@@ -54,12 +54,21 @@ class NewGameForm(forms.Form):
         n_rows = cleaned_data['n_rows']
         n_cols = cleaned_data['n_cols']
         n_connects = cleaned_data['n_connects']
+        player_x = cleaned_data['player_x']
+        player_o = cleaned_data['player_o']
 
         # check that n_connects is valid
         max_dim = max(n_rows, n_cols)
         if n_connects > max_dim:
             err_msg = 'No. of connects: {} to win cannot be larger than maximum dimension: {}'
             err_msg = err_msg.format(n_connects, max_dim)
+            raise ValidationError(
+                err_msg,
+                code='invalid'
+            )
+
+        if player_x != 'human' and player_o != 'human':
+            err_msg = 'Not supporting two AI playing yet.'
             raise ValidationError(
                 err_msg,
                 code='invalid'

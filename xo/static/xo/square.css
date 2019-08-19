@@ -1,7 +1,9 @@
 .square{
     text-align: center;
     vertical-align: middle;
+    font-family: Arial;
     font-size: 60px;
+    font-weight: bold;
     background: #333;
     color: #ccc;
     list-style: none;
@@ -15,7 +17,9 @@
     width: 70px;
     height: 70px;
     line-height: 70px;
-    background: none;
+    text-align: center;
+    vertical-align: middle;
+    background: #333;
     border: none;
     opacity: 0;
     border-radius: 5px;

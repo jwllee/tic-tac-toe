@@ -1,15 +1,23 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'xo/square.css' %}">
+
 {% if value == ' ' %}
     {# This square is empty #}
-    <form method="POST" class="square">
+    <form method="POST" class="square" board-update-url="{% url 'xo:board_update' %}">
         {% csrf_token %}
         <input name="row_index" value="{{ row_index }}" type="hidden">
         <input name="col_index" value="{{ col_index }}" type="hidden">
-        <button type="submit">{{ next_player }}</button>
+        <input name="next_player" value="{{ game.next_player }}" type="hidden">
+        <input name="next_player_type" value="{{ game.next_player_type }}" type="hidden">
+        <input name="cur_player" value="{{ game.cur_player }}" type="hidden">
+        <input name="cur_player_type" value="{{ game.cur_player_type }}" type="hidden">
+        <input name="game_id" value="{{ game.id }}" type="hidden">
+        <button type="submit" class="cell"></button>
     </form>
 {% else %}
     <div class="square">
         {{ value }}
     </div>
 {% endif %}
+<script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/button.js' %}"></script>
