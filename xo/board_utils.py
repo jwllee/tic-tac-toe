@@ -98,18 +98,11 @@ def get_next_player(board_x, board_o, n_cells):
 
 
 def get_cur_player(board_x, board_o, n_cells):
-    n_x = 0
-    n_o = 0
-    for i in range(n_cells):
-        n_x += board_x & 0b1
-        n_o += board_o & 0b1
-        board_x >>= 1
-        board_o >>= 1
-
-    err_msg = 'Board has {} X and {} O'
-    err_msg = err_msg.format(n_x, n_o)
-    assert abs(n_x - n_o) == 1 or n_x == n_o, err_msg
-    player = MARKER_O if n_o > n_x else MARKER_X
+    next_player = get_next_player(board_x, board_x, n_cells)
+    if next_player == MARKER_O:
+        player = MARKER_X
+    else:
+        player = MARKER_O
     return player
 
 

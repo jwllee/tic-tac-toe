@@ -98,6 +98,16 @@ $(document).on('click', 'button.cell', function(e) {
     // disable all buttons from being clicked
     $(".board :submit").prop("disabled", true);
 
+    // change message to last_marker is thinking, if last_marker is AI
+    console.log('Current player (' + cur_marker + ') type: ' + cur_player_type);
+    if (cur_player_type != 'human') {
+        var msg = "Player " + cur_marker + " is thinking...";
+        var msgDiv = '<div id="message">' + msg + '</div>';
+        $('div #message').empty();
+        $('div #message').append(msgDiv);
+        console.log(msg);
+    }
+
     // send json query
     var url = form.attr('board-update-url');
     console.log('Board update URL: ' + url);
@@ -107,14 +117,4 @@ $(document).on('click', 'button.cell', function(e) {
         dataType: 'json',
         success: onSuccess,
     });
-
-    // change message to last_marker is thinking, if last_marker is AI
-    console.log('Current player type: ' + cur_player_type);
-    if (cur_player_type != 'human') {
-        var msg = "Player " + cur_marker + " is thinking...";
-        var msgDiv = '<div id="message">' + msg + '</div>';
-        $('div #message').empty();
-        $('div #message').append(msgDiv);
-        console.log(msg);
-    }
 });
