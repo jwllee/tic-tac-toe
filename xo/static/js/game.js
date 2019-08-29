@@ -103,7 +103,13 @@ $(document).on('click', 'table button', function(e) {
     if (cur_player_type != 'human') {
         // change message to player is thinking
         var curMarker = $('div .board').attr('next-player');
-        var msg = 'Player ' + curMarker + ' is thinking...';
+        var nextMarker = 'X';
+
+        if (curMarker == 'X') {
+            nextMarker = 'O';
+        }
+
+        var msg = 'Player ' + nextMarker + ' is thinking...';
         var msgDiv = '<div class="row justify-content-center">' + msg + '</div>';
         $('div.col#message').empty();
         $('div.col#message').append(msgDiv);
