@@ -18,3 +18,7 @@ to make things accessible.
 
 ## Implementation
 To be updated...
+
+## Acknowledgement
+- Frontend design: copied the dark theme from somewhere but cannot seem to find the link back...
+- Interaction between frontend and backend: https://github.com/paulcwatts/django-tictactoe
