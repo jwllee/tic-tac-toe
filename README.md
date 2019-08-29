@@ -1,7 +1,20 @@
-# tic-tac-toe
+# Tic Tac Toe game
+This is my first exposure to the Django framework and pretty much the web
+development process from start to production at Heroku. TBH, I was much more
+interested in the AI part but packaging everything as a web app is a great way
+to make things accessible.
 
-## Attribution
-- Cross icon made by [freepik](https://www.freepik.com/?__hstc=57440181.81be492351d813de751c13dd5340bca9.1560536342099.1560536342099.1560536342099.1&__hssc=57440181.6.1560536342100&__hsfp=3454680338) from www.flaticon.com
-- Nought icon made by
-  [hirschwolf](https://www.flaticon.com/authors/hirschwolf) from
-  www.flaticon.com
+## Features
+- Minimax AI (alpha-beta pruning, transposition table, iterative deepening)
+- Can pitch two AIs to play each other
+- Configurable board dimensions (m x n) where 3 <= m <= 5 and 3 <= n <= 5
+- Configurable number of connects to win game 
+
+## Stack
+- Django
+- Bootstrap
+- Ajax
+- Postgres
+
+## Implementation
+To be updated...
