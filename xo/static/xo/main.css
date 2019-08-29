@@ -1,3 +1,14 @@
+table.table-fit {
+    width: auto !important;
+    table-layout: auto !important;
+}
+table.table-fit thead th, table.table-fit tfoot th {
+    width: auto !important;
+}
+table.table-fit tbody td, table.table-fit tfoot td {
+    width: auto !important;
+}
+
 body{
     margin: 20px;
     background: #212121;
@@ -6,14 +17,6 @@ body{
 h1{
     text-align: center;
     color: #fff;
-}
-#box{
-    display: block;
-    overflow: auto;
-    margin: 40px auto;
-    background: #666;
-    padding-bottom: 40px;
-    border-radius: 10px;
 }
 #box-3x3{
     width: 350px;
@@ -39,11 +42,20 @@ h1{
     padding-bottom: 40px;
     border-radius: 10px;
 }
-#message{
+#message {
     text-align: center;
+    background: #333;
+    color: #fff;
+    margin-bottom: 10px;
+}
+#message-link {
     background: #333;
     color: #fff;
 }
 .board{
     margin: 40px;
+    background: #666;
+    border-radius: 10px;
+    padding: 40px;
+    padding-bottom: 5px;
 }

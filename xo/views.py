@@ -64,7 +64,7 @@ def game(request, pk):
             err_msg = 'MoveForm invalid, should not happen'
             raise ValueError(err_msg)
     else:
-        game.play_auto()
+        # game.play_auto()
         game.save()
 
     board_width = (game.n_cols + 1) * 90 - 10
@@ -126,6 +126,8 @@ def board_update(request):
         'next_player': game.next_player,
         'next_player_type': game.next_player_type,
     }
+    info_msg = 'JSON response: ' + str(data)
+    logger.info(info_msg)
     return JsonResponse(data)
 
 

@@ -67,13 +67,13 @@ class NewGameForm(forms.Form):
                 code='invalid'
             )
 
-        if player_x != 'human' and player_o != 'human':
-            err_msg = 'Not supporting two AI playing yet.'
-            raise ValidationError(
-                err_msg,
-                code='invalid'
-            )
-
+#         if player_x != 'human' and player_o != 'human':
+#             err_msg = 'Not supporting two AI playing yet.'
+#             raise ValidationError(
+#                 err_msg,
+#                 code='invalid'
+#             )
+ 
 
 class MoveForm(forms.Form):
     row_index = forms.IntegerField(min_value=0)

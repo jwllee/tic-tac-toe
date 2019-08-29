@@ -1,31 +1,25 @@
 .square{
+    margin: 0px;
+    padding: 0px;
     text-align: center;
     vertical-align: middle;
     font-family: Arial;
     font-size: 60px;
     font-weight: bold;
     background: #333;
+    border: none;
     color: #ccc;
     list-style: none;
     width: 70px;
     height: 70px;
-    margin: 10px;
     float: left;
     border-radius: 5px;
 }
-.square button[type=submit]{
-    width: 70px;
-    height: 70px;
-    line-height: 70px;
-    text-align: center;
-    vertical-align: middle;
-    background: #333;
-    border: none;
-    opacity: 0;
-    border-radius: 5px;
-}
-.square button[type=submit]:hover{
+
+button[type=submit]:hover{
     cursor: pointer;
     background: #000;
     opacity: 1;
+    margin: 0px;
+    padding: 0px;
 }

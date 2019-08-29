@@ -6,38 +6,34 @@
 {% endblock %}
 
 {% block content %}
-    <div class="text-center" id="box">
-    <header>
-        <h1>Tic-Tac-Toe</h1>
-    </header>
-    <div id="message">Would you like to play a game?</div>
-    <form method="POST" id="form">
-        {% csrf_token %}
-        <div>
-            <label class="label">Number of rows</label>
-            {{ form.n_rows }}
-        </div>
-        <div>
-            <label class="label">Number of columns</label>
-            {{ form.n_cols }}
-        </div>
-        <div>
-            <label class="label">Number of connects</label>
-            {{ form.n_connects }}
-        </div>
-        <div>
-            <label class="label">Is Kriegspiel</label>
-            {{ form.is_kriegspiel }}
-        </div>
-        <div>
-            <label class="label">Player X type</label>
-            {{ form.player_x }}
-        </div>
-        <div>
-            <label class="label">Player O type</label>
-            {{ form.player_o }}
-        </div>
-        <button type="submit">Play</button>
-    </form>
+<div class="row justify-content-center">
+    <div class="col">
+        <form method="POST" id="box">
+            <h1>Tic Tac Toe</h1>
+            <hr class="mt-0 mb-4">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="label">Number of rows</label>
+                {{ form.n_rows }}
+            </div>
+            <div class="form-group">
+                <label class="label">Number of columns</label>
+                {{ form.n_cols }}
+            </div>
+            <div class="form-group">
+                <label class="label">Number of connects</label>
+                {{ form.n_connects }}
+            </div>
+            <div class="form-group">
+                <label class="label">Player X type</label>
+                {{ form.player_x }}
+            </div>
+            <div class="form-group">
+                <label class="label">Player O type</label>
+                {{ form.player_o }}
+            </div>
+            <button type="submit">Play</button>
+        </form>
     </div>
+</div>
 {% endblock %}
