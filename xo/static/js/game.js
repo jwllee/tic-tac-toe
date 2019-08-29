@@ -43,6 +43,7 @@ function onSuccess(data) {
     }
     else {
         // update next_player for all forms
+        $('input[name="next_player"]').prop('value', data.next_player);
         $('div .board').attr('next-player-type', data.next_player_type);
         $('div .board').attr('next-player', data.next_player);
 
