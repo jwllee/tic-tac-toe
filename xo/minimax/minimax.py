@@ -1,10 +1,10 @@
 import time, operator
 import numpy as np
 from collections import namedtuple
-from . import board_utils, win_state_utils
-from . import models
-from .utils import timeit
-from xo.transposition_table import TTable, State
+from .. import board_utils, win_state_utils
+from .. import models
+from ..utils import timeit
+from .transposition_table import TTable, State
 
 
 def get_max_score(n_rows, n_cols):
