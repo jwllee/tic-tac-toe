@@ -21,7 +21,9 @@ def validate_player_type(player_type):
 PLAYER_TYPES = [
     ('human', 'Human'),
     ('xo.players.RandomPlayer', 'Random player'),
-    ('xo.players.MinimaxPlayer', 'Minimax player')
+    ('xo.players.MinimaxPlayer', 'Minimax player'),
+    ('xo.players.MCTSPlayer', 'MCTS player'),
+
 ]
 
 

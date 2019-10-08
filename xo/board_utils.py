@@ -98,7 +98,7 @@ def get_next_player(board_x, board_o, n_cells):
 
 
 def get_cur_player(board_x, board_o, n_cells):
-    next_player = get_next_player(board_x, board_x, n_cells)
+    next_player = get_next_player(board_x, board_o, n_cells)
     if next_player == MARKER_O:
         player = MARKER_X
     else:

@@ -1,5 +1,5 @@
-from xo import board_utils
-from xo.utils import make_logger
+from .. import board_utils
+from ..utils import make_logger
 import numpy as np
 from collections import namedtuple
 
