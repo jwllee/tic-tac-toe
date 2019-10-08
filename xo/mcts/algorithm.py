@@ -11,7 +11,7 @@ logger = make_logger('mcts.algorithm.py')
 np.random.seed(123)
 
 
-SEC_LIMIT_PER_MOVE = 3
+SEC_LIMIT_PER_MOVE = 4
 UCB_CONSTANT = np.sqrt(2)
 
 
