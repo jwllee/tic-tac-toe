@@ -260,15 +260,15 @@ def get_best_move(game):
     # logger.info(info_msg)
 
     best_child = select_child_by_ucb(root, it)
-    info_msg = 'Best child of root: {}'.format(best_child)
+    # info_msg = 'Best child of root: {}'.format(best_child)
     # logger.info(info_msg)
-    info_msg = 'Number of iterations: {}'.format(it)
-    logger.info(info_msg)
-    for child in best_child.children:
-        info_msg = 'Best child child: {}'.format(child)
-        logger.info(info_msg)
-    for child in root.children:
-        info_msg = 'Root child: {}'.format(child)
-        logger.info(info_msg)
+    # info_msg = 'Number of iterations: {}'.format(it)
+    # logger.info(info_msg)
+    # for child in best_child.children:
+    #     info_msg = 'Best child child: {}'.format(child)
+    #     logger.info(info_msg)
+    # for child in root.children:
+    #     info_msg = 'Root child: {}'.format(child)
+    #     logger.info(info_msg)
 
     return best_child.action
