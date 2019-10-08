@@ -102,6 +102,8 @@ def board_update(request):
         game.play_xy(row_ind, col_ind)
 
     try:
+        info_msg = 'Trying to play next auto'
+        logger.info(info_msg)
         move = game.play_next_auto()
     except:
         move = None

@@ -161,7 +161,11 @@ class Game(models.Model):
 
         next_player = self.next_player
         player = self.player_x if next_player == MARKER_X else self.player_o
+        # info_msg = 'Get player {}'.format(player)
+        # logger.info(info_msg)
         player_obj = get_player(player)
+        # info_msg = 'Got player {}'.format(player_obj)
+        # logger.info(info_msg)
         index = player_obj.play(self)
         self.play(index)
 
