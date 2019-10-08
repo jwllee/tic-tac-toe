@@ -11,7 +11,7 @@ logger = make_logger('mcts.algorithm.py')
 np.random.seed(123)
 
 
-SEC_LIMIT_PER_MOVE = 4
+SEC_LIMIT_PER_MOVE = 10
 UCB_CONSTANT = np.sqrt(2)
 
 
@@ -34,7 +34,7 @@ class Node:
         self.action = action
 
     def __repr__(self):
-        repr_ = '{}("{}", {}, {}, {}/{})'
+        repr_ = '{}("{}", {}, {}, {:.1f}/{})'
         n_cells = self.n_rows * self.n_cols
         board_str = board_utils.get_board_str(self.board_x, self.board_o, n_cells)
         repr_ = repr_.format(Node.__name__,
@@ -129,12 +129,17 @@ def is_game_over(node):
     return is_over
 
 
+def get_Q(node):
+    v = node.n_wins / node.n_selected
+    return v
+
+
 def get_uct(node, time_):
     ucb = np.inf
     if node.n_selected > 0:
-        v = node.n_wins / node.n_selected
-        u = np.sqrt(np.log(time_)/node.n_selected)
-        ucb = v + UCB_CONSTANT * u
+        v = get_Q(node)
+        u = UCB_CONSTANT * np.sqrt(np.log(time_) / node.n_selected)
+        ucb = v + u
 
         # info_msg = 'value: {:.3f} + uncertainty: {:.3f} = {:.3f}'
         # info_msg = info_msg.format(v, u, ucb)
@@ -187,14 +192,64 @@ def expand(node):
     child = node.add_next_child()
     return child
 
+#======================================================================
+# Simulation policy using heuristic
+#======================================================================
+
+def get_heuristic(node):
+    win_board = win_state_utils.get_board_wins(node.n_rows, 
+                                               node.n_cols, 
+                                               node.n_connects)
+    n_wins = len(win_board)
+
+    # measure its closeness to winning to all the wins
+    # basically infinity
+    max_score = -(1 << 30)
+    n_cells = node.n_rows * node.n_cols
+    marker = board_utils.get_next_player(node.board_x, node.board_o, n_cells)
+
+    if marker == board_utils.MARKER_X:
+        board = node.board_x
+        board_oppo = node.board_o
+    else:
+        board = node.board_o
+        board_oppo = node.board_x
+
+    for win in win_board:
+        # first check if the win is possible to reach
+        # should equal 0 since where there's 1 in win state, it should be empty in opposition board
+        is_valid = (win & board_oppo) == 0
+        if not is_valid:
+            continue
+
+        same = board & win
+        score = bin(same).count('1') 
+        max_score = max(score, max_score)
+
+    return max_score
+
+
+def simulate_children(node):
+    children = list()
+    next_marker = board_utils.get_opposite_marker(node.marker)
+    for index in node.next_action_indexes:
+        child = mark_cell(node, next_marker, index, append=False)
+        children.append(child)
+    return children
+
+#======================================================================
 
 def simulate(node):
     while not is_game_over(node):
         # rollout policy is just get random child node
-        random_ind = np.random.randint(0, len(node.next_action_indexes))
-        action = node.next_action_indexes[random_ind]
+        # randind = np.random.randint(0, len(node.next_action_indexes))
+        action = node.next_action_indexes[0]
         next_marker = board_utils.get_opposite_marker(node.marker)
         node = mark_cell(node, next_marker, action, append=False)
+        # children = simulate_children(node)
+        # sorted_children = sorted(children, key=lambda c: get_heuristic(c))
+        # get the child closest to game_over state
+        # node = sorted_children[-1]
 
     is_over = board_utils.is_game_over(
         node.board_x,
@@ -210,6 +265,10 @@ def backpropagate(node, result):
     def update(node, result):
         if node.marker == result:
             node.n_wins += 1
+        elif result != ' ':
+            node.n_wins -= 1
+        # give some value to getting a draw to differentiate between
+        # draw and lose end result
         node.n_selected += 1
 
     # update node
